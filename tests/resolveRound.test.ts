@@ -1,0 +1,4 @@
+import { describe, expect, it } from "vitest";
+import { resolveRound } from "../src/domain/resolveRound";
+const card=(element:"rock"|"paper"|"scissors",level:number)=>({id:`${element}-${level}`,element,level});
+describe("resolveRound",()=>{it("rock beats scissors even at a lower level",()=>expect(resolveRound(card("rock",1),card("scissors",10))).toMatchObject({winner:"PLAYER_ONE",reason:"ELEMENT_ADVANTAGE"}));it("paper beats rock",()=>expect(resolveRound(card("paper",1),card("rock",10)).winner).toBe("PLAYER_ONE"));it("compares levels only for matching elements",()=>expect(resolveRound(card("rock",3),card("rock",8))).toMatchObject({winner:"PLAYER_TWO",reason:"HIGHER_LEVEL"}));it("detects an exact draw",()=>expect(resolveRound(card("paper",5),card("paper",5))).toMatchObject({winner:null,reason:"EXACT_TIE"}));});

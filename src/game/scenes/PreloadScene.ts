@@ -4,11 +4,11 @@ import { COLORS, drawPixelBackdrop, drawPixelPanel, pixelText } from "../../conf
 export class PreloadScene extends Phaser.Scene {
   constructor() { super("PreloadScene"); }
   preload() {
-    this.load.image("poker-table-art", "/assets/aseprite/poker-table-16bit-mcp-export.png");
-    this.load.image("card-art-rock", "/assets/aseprite/rock-card-mcp-export.png");
-    this.load.image("card-art-paper", "/assets/aseprite/paper-card-mcp-export.png");
-    this.load.image("card-art-scissors", "/assets/aseprite/scissors-card-mcp-export.png");
-    this.load.spritesheet("item-icons", "/assets/items/run-items-sheet.png", { frameWidth: 64, frameHeight: 64 });
+    this.load.image("poker-table-art", "assets/aseprite/poker-table-16bit-mcp-export.png");
+    this.load.image("card-art-rock", "assets/aseprite/rock-card-mcp-export.png");
+    this.load.image("card-art-paper", "assets/aseprite/paper-card-mcp-export.png");
+    this.load.image("card-art-scissors", "assets/aseprite/scissors-card-mcp-export.png");
+    this.load.spritesheet("item-icons", "assets/items/run-items-sheet.png", { frameWidth: 64, frameHeight: 64 });
   }
   create() {
     drawPixelBackdrop(this, COLORS.magenta);

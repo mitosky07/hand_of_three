@@ -26,7 +26,7 @@ The lobby always shows the next step, current round and best round. Inventory su
 
 ## Editable Aseprite assets
 
-The table, cards and item icons are preserved as native documents in `public/assets/aseprite/*.aseprite`. The game loads their exported PNG files directly.
+The editable Aseprite source documents are stored in `art-source/aseprite`. The game loads only their exported PNG files from `public/assets`.
 
 ## Play-time log
 

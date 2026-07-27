@@ -4,8 +4,7 @@ import { MatchController } from "../../domain/matchController";
 import { MatchPhase } from "../../domain/MatchPhase";
 import { ELEMENT_LABEL, type ElementType, type PlayerId } from "../../domain/Card";
 import type { RoundResult } from "../../domain/resolveRound";
-import { getRewardMultiplier, type RoundReward } from "../../domain/progression";
-import { chooseRandomCard } from "../../services/aiService";
+import { getRewardMultiplier, type RoundReward, type RunItemId } from "../../domain/progression";
 import { audioService } from "../../services/audioService";
 import { CardView } from "../objects/CardView";
 import { GameButton } from "../objects/GameButton";
@@ -13,10 +12,16 @@ import { getFinishAnimationSpec } from "../animations/finishAnimation";
 import { progressionService } from "../../services/progressionService";
 import { WINNING_SCORE } from "../../config/gameConfig";
 import { getMatchCommand } from "../input/keyboardControls";
+import { getSettings } from "../../services/storageService";
+import { getOracleForRound } from "../../domain/oracle";
+import { createSeededRandom, dailySeed } from "../../domain/random";
+import { dailyService } from "../../services/dailyService";
+import { CARD_BACKS, CHIP_STYLES, feltById } from "../../domain/cosmetics";
 
 export class MatchScene extends Phaser.Scene {
   private controller!: MatchController;
   private mode: "AI" | "LOCAL" = "AI";
+  private daily = false;
   private handViews: CardView[] = [];
   private selected: CardView | null = null;
   private status!: Phaser.GameObjects.Text;
@@ -33,16 +38,30 @@ export class MatchScene extends Phaser.Scene {
   private handCounter!: Phaser.GameObjects.Text;
   private statusPlate!: Phaser.GameObjects.Rectangle;
   private doubleActive = false;
+  private houseMatchActive = false;
+  private itemOverlay: Phaser.GameObjects.Container | null = null;
   private activeHandPlayer: PlayerId = "PLAYER_ONE";
   private keyboardCardIndex = -1;
   private localReadyAction: (() => void) | null = null;
+  private pendingAdvance: (() => void) | null = null;
 
   constructor() { super("MatchScene"); }
-  init(data: { mode: "AI" | "LOCAL" }) { this.mode = data.mode ?? "AI"; }
+  init(data: { mode: "AI" | "LOCAL"; daily?: boolean }) { this.mode = data.mode ?? "AI"; this.daily = Boolean(data.daily); }
 
   create() {
     const profile = progressionService.get();
-    this.controller = new MatchController(this.mode, undefined, undefined, undefined, this.mode === "AI" ? profile.run.upgrades : {});
+    const runRound = this.daily ? dailyService.get().round : profile.run.round;
+    const oracle = getOracleForRound(runRound);
+    const random = this.daily ? createSeededRandom(`${dailySeed()}-round-${runRound}`) : undefined;
+    this.controller = new MatchController(
+      this.mode,
+      undefined,
+      this.mode === "AI" ? oracle.name : undefined,
+      random,
+      this.mode === "AI" ? (this.daily ? dailyService.get().upgrades : profile.run.upgrades) : {},
+      oracle.weights,
+      { carbonPaper: this.mode === "AI" && !this.daily && profile.run.relics.includes("carbon-paper") },
+    );
     drawPixelBackdrop(this, COLORS.gold);
     this.drawTable();
     this.score = this.add.text(54, 42, "", { fontFamily: PIXEL_FONT, fontSize: "13px", color: "#efe2bc", lineSpacing: 8 });
@@ -57,9 +76,9 @@ export class MatchScene extends Phaser.Scene {
     this.statusPlate = this.add.rectangle(640, 395, 670, 68, COLORS.ink, .84).setStrokeStyle(2, COLORS.gold, .5);
     this.status = this.add.text(640, 395, "", { ...pixelText(10), wordWrap: { width: 640 }, lineSpacing: 6 }).setOrigin(.5);
     this.confirm = new GameButton(this, 640, 465, "2 · Confirm", () => this.confirmSelection(), 230, "blue");
-    new GameButton(this, 215, 465, "Pause", () => this.scene.launch("PauseScene", { match: this }), 170, "red");
-    this.doubleButton = new GameButton(this, 1065, 465, "Double item", () => this.activateDoubleToken(), 205, "purple");
-    this.doubleButton.setVisible(this.mode === "AI");
+    new GameButton(this, 215, 465, "Pause", () => this.openPause(), 170, "red");
+    this.doubleButton = new GameButton(this, 1065, 465, "I · Run items", () => this.openItemMenu(), 205, "purple");
+    this.doubleButton.setVisible(this.mode === "AI" && !this.daily);
     const keyboard = this.input.keyboard;
     keyboard?.on("keydown", this.handleKeyDown, this);
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => keyboard?.off("keydown", this.handleKeyDown, this));
@@ -69,15 +88,16 @@ export class MatchScene extends Phaser.Scene {
   private drawTable() {
     const texture = this.textures.get("poker-table-art");
     if (!texture.has("table-crop")) texture.add("table-crop", 0, 50, 200, 1154, 835);
-    this.add.image(640, 392, "poker-table-art", "table-crop").setDisplaySize(1080, 560).setDepth(-5);
+    const felt = feltById(progressionService.get().selectedFelt);
+    this.add.image(640, 392, "poker-table-art", "table-crop").setDisplaySize(1080, 560).setTint(felt.tint).setDepth(-5);
   }
 
   private render() {
     const { players, round, phase } = this.controller.state;
     const profile = progressionService.get();
     this.score.setText(this.mode === "AI" ? `YOU\nSEALS ${players.PLAYER_ONE.score}/${WINNING_SCORE}` : `${players.PLAYER_ONE.name.toUpperCase()}\n${this.pips(players.PLAYER_ONE.score)}  ·  DECK ${players.PLAYER_ONE.deck.length}`);
-    this.opponent.setText(this.mode === "AI" ? `ORACLE\nSEALS ${players.PLAYER_TWO.score}/${WINNING_SCORE}` : `${players.PLAYER_TWO.name.toUpperCase()}\n${this.pips(players.PLAYER_TWO.score)}  ·  DECK ${players.PLAYER_TWO.deck.length}`);
-    this.roundText.setText(`ROUND ${String(this.mode === "AI" ? profile.run.round : round).padStart(2, "0")}`);
+    this.opponent.setText(this.mode === "AI" ? `${players.PLAYER_TWO.name.toUpperCase()}\nSEALS ${players.PLAYER_TWO.score}/${WINNING_SCORE}` : `${players.PLAYER_TWO.name.toUpperCase()}\n${this.pips(players.PLAYER_TWO.score)}  ·  DECK ${players.PLAYER_TWO.deck.length}`);
+    this.roundText.setText(`${this.daily ? "DAILY " : ""}ROUND ${String(this.mode === "AI" ? (this.daily ? dailyService.get().round : profile.run.round) : round).padStart(2, "0")}`);
     const maxHands = WINNING_SCORE * 2 - 1;
     this.handCounter.setText(this.mode === "AI" ? `HAND ${Math.min(round, maxHands)} OF ${maxHands} · FIRST TO ${WINNING_SCORE}` : `HAND ${round} · FIRST TO ${WINNING_SCORE}`);
     this.updateEconomyHud();
@@ -87,7 +107,9 @@ export class MatchScene extends Phaser.Scene {
       this.renderHand("PLAYER_ONE");
       this.status.setText(this.selected ? "STEP 2 · CONFIRM YOUR PLAY" : "STEP 1 · CHOOSE A CARD FROM YOUR HAND");
       this.confirm.setVisible(true).setEnabled(Boolean(this.selected));
-      this.doubleButton.setVisible(this.mode === "AI").setEnabled(this.mode === "AI" && !this.doubleActive && progressionService.get().run.doubleTokens > 0);
+      const itemCount = this.runItemCount();
+      this.doubleButton.setLabel(this.doubleActive ? `x2 active · ${itemCount}` : `I · Items ${itemCount}`);
+      this.doubleButton.setVisible(this.mode === "AI" && !this.daily).setEnabled(this.mode === "AI" && !this.daily && itemCount > 0);
     }
   }
 
@@ -112,11 +134,12 @@ export class MatchScene extends Phaser.Scene {
 
   private renderOpponentHand(count: number) {
     this.opponentHand.removeAll(true);
+    const back = CARD_BACKS.find((item) => item.id === progressionService.get().selectedCardBack) ?? CARD_BACKS[0];
     for (let index = 0; index < count; index++) {
       const x = (index - (count - 1) / 2) * 34;
       const shadow = this.add.rectangle(x + 3, 4, 52, 68, COLORS.ink);
-      const card = this.add.rectangle(x, 0, 52, 68, COLORS.feltDark).setStrokeStyle(2, COLORS.woodLight);
-      const mark = this.add.text(x, 1, "III", pixelText(6, "#9fd3a9")).setOrigin(.5);
+      const card = this.add.rectangle(x, 0, 52, 68, back.color).setStrokeStyle(2, COLORS.woodLight);
+      const mark = this.add.text(x, 1, back.mark, pixelText(6, "#9fd3a9")).setOrigin(.5);
       shadow.setAlpha(0); card.setAlpha(0); mark.setAlpha(0);
       this.tweens.add({ targets: [shadow, card, mark], alpha: 1, duration: 170, delay: index * 45 });
       this.opponentHand.add([shadow, card, mark]);
@@ -129,12 +152,16 @@ export class MatchScene extends Phaser.Scene {
     if (this.selected && this.selected !== view) {
       this.selected.setSelected(false);
       this.controller.clearSelection("PLAYER_ONE");
+      this.selected = null;
+    }
+    if (!this.controller.select("PLAYER_ONE", view.card.id)) {
+      this.status.setText("HEAVY CARDS CANNOT FOLLOW THE SAME ELEMENT");
+      return;
     }
     this.selected = view;
     this.keyboardCardIndex = this.handViews.indexOf(view);
-    this.controller.select("PLAYER_ONE", view.card.id);
     view.setSelected(true);
-    this.status.setText("STEP 2 · CONFIRM YOUR PLAY");
+    this.status.setText(this.selectionForecast(view.card));
     this.confirm.setEnabled(true);
   }
 
@@ -150,8 +177,7 @@ export class MatchScene extends Phaser.Scene {
   }
 
   private aiTurn() {
-    const cpu = this.controller.state.players.PLAYER_TWO;
-    const choice = chooseRandomCard(cpu.hand);
+    const choice = this.controller.chooseRandomCard("PLAYER_TWO");
     this.controller.select("PLAYER_TWO", choice.id);
     this.controller.lock("PLAYER_TWO");
     this.reveal();
@@ -175,8 +201,11 @@ export class MatchScene extends Phaser.Scene {
 
   private selectPlayerTwo(view: CardView) {
     if (this.controller.state.players.PLAYER_TWO.selectedCard) return;
+    if (!this.controller.select("PLAYER_TWO", view.card.id)) {
+      this.status.setText("HEAVY CARDS CANNOT FOLLOW THE SAME ELEMENT");
+      return;
+    }
     this.handViews.forEach(item => item.disableInteractive());
-    this.controller.select("PLAYER_TWO", view.card.id);
     this.keyboardCardIndex = this.handViews.indexOf(view);
     view.setSelected(true);
     this.status.setText("PLAY LOCKED · PREPARING DUEL");
@@ -230,18 +259,40 @@ export class MatchScene extends Phaser.Scene {
         : result.winner === "PLAYER_ONE" ? "PLAYER 1 TAKES THE HAND" : "PLAYER 2 TAKES THE HAND";
       detail = result.reason === "ELEMENT_ADVANTAGE" ? `${ELEMENT_LABEL[winner.element]} BEATS ${ELEMENT_LABEL[loser.element]}` : `LEVEL ${winner.level} BEATS LEVEL ${loser.level}`;
     }
+    if (result.luckyTriggered?.length) detail += ` · LUCKY x2: ${result.luckyTriggered.map((id) => id === "PLAYER_ONE" ? "YOU" : "RIVAL").join(" + ")}`;
     if (this.mode === "AI") detail += `\nSCORE ${this.controller.state.players.PLAYER_ONE.score} — ${this.controller.state.players.PLAYER_TWO.score} · BEST OF 3`;
-    this.status.setText(`${title}\n${detail}`);
+    this.status.setText(`${title}\n${detail} · ENTER TO CONTINUE`);
     audioService.play(result.winner === "PLAYER_ONE" ? "win" : result.winner === "PLAYER_TWO" ? "lose" : "tie");
-    if (result.winner) this.cameras.main.shake(130, .004);
-    this.time.delayedCall(1850, () => {
+    if (result.winner && !getSettings().reducedMotion) this.cameras.main.shake(130, .004);
+    let advanced = false;
+    const advance = () => {
+      if (advanced) return;
+      advanced = true;
+      this.pendingAdvance = null;
       this.center.removeAll(true);
       if (this.mode === "AI") {
-        this.controller.finishRound();
+        this.controller.finishRound(this.houseMatchActive && !result.winner);
+        this.houseMatchActive = false;
         if (this.controller.state.phase === MatchPhase.MATCH_FINISHED) {
-          const matchReward: RoundReward = progressionService.finishMatch(this.controller.state.winner === "PLAYER_ONE", playerOne.element, this.doubleActive);
+          if (this.daily) {
+            const dailyReward = dailyService.finish(this.controller.state.winner === "PLAYER_ONE");
+            this.scene.start("ResultsScene", { controller: this.controller, dailyReward });
+            return;
+          }
+          const matchReward: RoundReward = progressionService.finishMatch(
+            this.controller.state.winner === "PLAYER_ONE",
+            playerOne.element,
+            this.doubleActive,
+            this.controller.state.bonusChips,
+            this.controller.state.bonusMultiplier + (this.controller.state.wasBehind && progressionService.get().run.relics.includes("red-thread") ? .25 : 0),
+            {
+              playerScore: this.controller.state.players.PLAYER_ONE.score,
+              opponentScore: this.controller.state.players.PLAYER_TWO.score,
+              history: this.controller.state.history,
+            },
+          );
           this.doubleActive = false;
-          this.doubleButton.setLabel("Use double item");
+          this.doubleButton.setLabel("I · Run items");
           this.scene.start("ResultsScene", { controller: this.controller, roundReward: matchReward });
           return;
         }
@@ -252,15 +303,80 @@ export class MatchScene extends Phaser.Scene {
       this.controller.finishRound();
       if (this.controller.state.phase === MatchPhase.MATCH_FINISHED) this.scene.start("ResultsScene", { controller: this.controller });
       else { this.selected = null; this.render(); }
-    });
+    };
+    this.pendingAdvance = advance;
+    this.time.delayedCall(getSettings().reducedMotion ? 850 : 1850, advance);
   }
 
   private activateDoubleToken() {
     if (this.doubleActive || !progressionService.useDoubleToken()) return;
     this.doubleActive = true;
-    this.doubleButton.setLabel("x2 ACTIVE").setEnabled(false);
+    this.closeItemMenu();
     this.status.setText("ITEM ACTIVE · x2 CHIPS IF YOU WIN THIS MATCH");
     this.updateEconomyHud();
+  }
+
+  private openItemMenu() {
+    if (this.itemOverlay || this.mode !== "AI" || this.daily) return;
+    const run = progressionService.get().run;
+    const overlay = this.add.container(0, 0).setDepth(30);
+    this.itemOverlay = overlay;
+    overlay.add([
+      this.add.rectangle(640, 360, 1280, 720, COLORS.ink, .9),
+      this.add.rectangle(640, 350, 760, 570, COLORS.panelDark).setStrokeStyle(5, COLORS.violet),
+      this.add.text(640, 105, "RUN ITEMS", pixelText(20, "#d9b867")).setOrigin(.5),
+      this.add.text(640, 140, "USE BEFORE LOCKING · PRESS 1-5 · ESC TO CLOSE", pixelText(7, "#c9bea0")).setOrigin(.5),
+    ]);
+    const entries: Array<[string, number, () => void]> = [
+      [`DOUBLE CHIP ×${run.doubleTokens}`, run.doubleTokens, () => this.activateDoubleToken()],
+      [`LOADED COIN ×${run.items["loaded-coin"]}`, run.items["loaded-coin"], () => this.useRunItem("loaded-coin")],
+      [`SMOKE BREAK ×${run.items["smoke-break"]}`, run.items["smoke-break"], () => this.useRunItem("smoke-break")],
+      [`TABLE KNOCK ×${run.items["table-knock"]}`, run.items["table-knock"], () => this.useRunItem("table-knock")],
+      [`HOUSE MATCH ×${run.items["house-match"]}`, run.items["house-match"], () => this.useRunItem("house-match")],
+    ];
+    entries.forEach(([label, count, action], index) => {
+      const button = new GameButton(this, 640, 205 + index * 72, label, action, 500, index % 2 ? "blue" : "purple").setDepth(31);
+      button.setEnabled(count > 0 && !(index === 0 && this.doubleActive));
+      overlay.add(button);
+    });
+    const close = new GameButton(this, 640, 590, "Close", () => this.closeItemMenu(), 250, "red").setDepth(31);
+    overlay.add(close);
+  }
+
+  private closeItemMenu() {
+    this.itemOverlay?.destroy(true);
+    this.itemOverlay = null;
+  }
+
+  private useRunItem(id: RunItemId) {
+    if ((id === "loaded-coin" || id === "table-knock") && !this.selected) {
+      this.status.setText("SELECT A CARD BEFORE USING THIS ITEM");
+      this.closeItemMenu();
+      return;
+    }
+    if (!progressionService.useRunItem(id)) return;
+    if (id === "loaded-coin") {
+      this.controller.rerollCard("PLAYER_ONE", this.selected!.card.id);
+      this.selected = null;
+      this.closeItemMenu();
+      this.render();
+      this.status.setText("LOADED COIN · CARD REROLLED");
+    } else if (id === "smoke-break") {
+      const elements = [...new Set(this.controller.state.players.PLAYER_TWO.hand.map((card) => ELEMENT_LABEL[card.element]))];
+      this.status.setText(`SMOKE BREAK · ORACLE MAY HOLD ${elements.join(" / ")}`);
+    } else if (id === "table-knock") {
+      this.selected!.setLevel(this.selected!.card.level + 3);
+      this.status.setText(`TABLE KNOCK · ${ELEMENT_LABEL[this.selected!.card.element]} NOW LV ${this.selected!.card.level}`);
+    } else {
+      this.houseMatchActive = true;
+      this.status.setText("HOUSE MATCH ACTIVE · A DRAW DISCARDS BOTH CARDS");
+    }
+    this.closeItemMenu();
+  }
+
+  private runItemCount() {
+    const run = progressionService.get().run;
+    return run.doubleTokens + Object.values(run.items).reduce((total, count) => total + count, 0);
   }
 
   private updateEconomyHud() {
@@ -269,14 +385,26 @@ export class MatchScene extends Phaser.Scene {
       this.multiplierText.setText("");
       return;
     }
+    if (this.daily) {
+      const daily = dailyService.get();
+      this.chipsText.setText(`DAILY SEED ${daily.date}`);
+      this.multiplierText.setText(`SCORE ${daily.chips} · BEST ROUND ${daily.bestRound}`);
+      return;
+    }
     const profile = progressionService.get();
-    this.chipsText.setText(`◉ ${profile.chips} CHIPS`);
-    this.multiplierText.setText(`MULT x${getRewardMultiplier(profile).toFixed(2)} · ITEMS ${profile.run.doubleTokens}${this.doubleActive ? " ACTIVE" : ""}`);
+    const chip = CHIP_STYLES.find((item) => item.id === profile.selectedChipStyle) ?? CHIP_STYLES[0];
+    this.chipsText.setText(`${chip.glyph} ${profile.chips} CHIPS`);
+    this.multiplierText.setText(`MULT x${getRewardMultiplier(profile).toFixed(2)} · ITEMS ${this.runItemCount()}${this.doubleActive ? " · x2 ACTIVE" : ""}`);
   }
 
   private playFinishAnimation(element: ElementType, winner: CardView, loser: CardView, done: () => void) {
     const spec = getFinishAnimationSpec(element);
     this.status.setText(spec.announcement);
+    if (getSettings().reducedMotion) {
+      loser.setAlpha(.42);
+      this.time.delayedCall(220, done);
+      return;
+    }
     if (spec.kind === "SLICE") this.playSlice(winner, loser, done);
     else if (spec.kind === "CRUSH") this.playCrush(winner, loser, done);
     else this.playWrap(winner, loser, done);
@@ -359,6 +487,17 @@ export class MatchScene extends Phaser.Scene {
 
   private handleKeyDown(event: KeyboardEvent) {
     if (!this.sys.isActive() || !this.controller) return;
+    if (this.itemOverlay) {
+      event.preventDefault();
+      if (/^[1-5]$/.test(event.key)) this.activateItemSlot(Number(event.key) - 1);
+      else if (event.key === "Escape" || event.key === "Backspace" || event.key.toLowerCase() === "i") this.closeItemMenu();
+      return;
+    }
+    if (event.key.toLowerCase() === "i" && this.mode === "AI" && !this.daily && this.runItemCount() > 0) {
+      event.preventDefault();
+      this.openItemMenu();
+      return;
+    }
     const command = getMatchCommand(event.key);
     if (!command) return;
     event.preventDefault();
@@ -373,7 +512,34 @@ export class MatchScene extends Phaser.Scene {
     else if (command === "NEXT_CARD") this.focusAdjacentCard(1);
     else if (command === "CONFIRM") this.confirmKeyboardChoice();
     else if (command === "CANCEL") this.cancelKeyboardChoice();
-    else if (command === "PAUSE" && [MatchPhase.WAITING_FOR_SELECTION, MatchPhase.CARD_SELECTED].includes(this.controller.state.phase)) this.scene.launch("PauseScene", { match: this });
+    else if (command === "PAUSE" && [MatchPhase.WAITING_FOR_SELECTION, MatchPhase.CARD_SELECTED].includes(this.controller.state.phase)) this.openPause();
+  }
+
+  private openPause() {
+    this.scene.launch("PauseScene", {
+      match: this,
+      allowRestart: this.mode === "LOCAL",
+      leaveLabel: this.mode === "LOCAL" ? "Leave table" : this.daily ? "Forfeit daily" : "Forfeit run",
+      onLeave: () => this.forfeitMatch(),
+    });
+  }
+
+  private forfeitMatch() {
+    if (this.daily) dailyService.finish(false);
+    else if (this.mode === "AI") progressionService.finishMatch(false, "rock", false);
+    this.scene.stop();
+    this.scene.start("MainMenuScene");
+  }
+
+  private activateItemSlot(index: number) {
+    const actions = [
+      () => this.activateDoubleToken(),
+      () => this.useRunItem("loaded-coin"),
+      () => this.useRunItem("smoke-break"),
+      () => this.useRunItem("table-knock"),
+      () => this.useRunItem("house-match"),
+    ];
+    actions[index]?.();
   }
 
   private focusAdjacentCard(direction: -1 | 1) {
@@ -391,6 +557,7 @@ export class MatchScene extends Phaser.Scene {
   }
 
   private confirmKeyboardChoice() {
+    if (this.pendingAdvance) { this.pendingAdvance(); return; }
     if (this.localReadyAction) { this.localReadyAction(); return; }
     if (this.activeHandPlayer === "PLAYER_ONE") this.confirmSelection();
     else if (this.keyboardCardIndex >= 0) this.selectPlayerTwo(this.handViews[this.keyboardCardIndex]);
@@ -414,7 +581,7 @@ export class MatchScene extends Phaser.Scene {
   }
 
   private updateStreak() {
-    if (this.mode === "AI") { this.streakText.setText("BEST OF 3 · LOSE THE MATCH AND THE RUN ENDS"); return; }
+    if (this.mode === "AI") { this.streakText.setText(this.daily ? "DAILY TABLE · SAME DEAL FOR EVERY PLAYER" : "BEST OF 3 · LOSE THE MATCH AND THE RUN ENDS"); return; }
     const history = this.controller.state.history;
     const latest = history.at(-1)?.winner;
     if (!latest) { this.streakText.setText(`FIRST TO ${WINNING_SCORE} SEALS`); return; }
@@ -424,4 +591,11 @@ export class MatchScene extends Phaser.Scene {
   }
 
   private pips(score: number) { return Array.from({ length: WINNING_SCORE }, (_, index) => index < score ? "◆" : "◇").join(" "); }
+
+  private selectionForecast(card: { element: ElementType; level: number }) {
+    const beats: Record<ElementType, ElementType> = { rock: "scissors", scissors: "paper", paper: "rock" };
+    const losesTo: Record<ElementType, ElementType> = { rock: "paper", scissors: "rock", paper: "scissors" };
+    const bonus = this.mode === "AI" && !this.daily ? progressionService.get().run.upgrades[card.element] : 0;
+    return `${ELEMENT_LABEL[card.element]} LV ${card.level} · BEATS ${ELEMENT_LABEL[beats[card.element]]} · LOSES TO ${ELEMENT_LABEL[losesTo[card.element]]}\nRUN BONUS +${bonus} · CONFIRM WHEN READY`;
+  }
 }

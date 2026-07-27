@@ -31,4 +31,11 @@ describe("TimeTrackingService", () => {
     expect(tracker.entries[0]).toMatchObject({ category: "TEST", description: "Interface audit", startedAt: 1_000, endedAt: 121_000 });
     expect(tracker.exportCsv()).toContain("TEST,\"Interface audit\",2.00");
   });
+
+  it("ignores valid JSON with an invalid persisted shape", () => {
+    localStorage.setItem("hand-of-three-time-entries", JSON.stringify({ not: "an array" }));
+    const tracker = new TimeTrackingService();
+    expect(tracker.entries).toEqual([]);
+    expect(tracker.elapsedMs).toBe(0);
+  });
 });

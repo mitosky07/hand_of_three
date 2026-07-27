@@ -52,7 +52,7 @@ function refreshFocus(scene: Phaser.Scene) {
 }
 
 function registerButton(scene: Phaser.Scene, button: GameButton) {
-  if (scene.sys.settings.key === "MatchScene") return;
+  if (["MatchScene", "OnlineMatchScene", "TutorialMatchScene"].includes(scene.sys.settings.key)) return;
   let state = menuStates.get(scene);
   if (!state) {
     const keyboard = scene.input.keyboard;

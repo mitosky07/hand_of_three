@@ -12,6 +12,11 @@ import { SettingsScene } from "../game/scenes/SettingsScene";
 import { CreditsScene } from "../game/scenes/CreditsScene";
 import { ShopScene } from "../game/scenes/ShopScene";
 import { CollectionScene } from "../game/scenes/CollectionScene";
+import { OnlineLobbyScene } from "../game/scenes/OnlineLobbyScene";
+import { OnlineMatchScene } from "../game/scenes/OnlineMatchScene";
+import { CosmeticsScene } from "../game/scenes/CosmeticsScene";
+import { TutorialMatchScene } from "../game/scenes/TutorialMatchScene";
+import { DailyShopScene } from "../game/scenes/DailyShopScene";
 
 export const phaserConfig: Phaser.Types.Core.GameConfig = {
   type: Phaser.AUTO,
@@ -19,7 +24,7 @@ export const phaserConfig: Phaser.Types.Core.GameConfig = {
   width: GAME_WIDTH,
   height: GAME_HEIGHT,
   backgroundColor: "#1a100c",
-  scene: [BootScene, PreloadScene, MainMenuScene, ModeSelectionScene, TutorialScene, MatchScene, PauseScene, ResultsScene, SettingsScene, CreditsScene, ShopScene, CollectionScene],
+  scene: [BootScene, PreloadScene, MainMenuScene, ModeSelectionScene, OnlineLobbyScene, OnlineMatchScene, TutorialScene, TutorialMatchScene, MatchScene, PauseScene, ResultsScene, SettingsScene, CreditsScene, ShopScene, DailyShopScene, CollectionScene, CosmeticsScene],
   scale: { mode: Phaser.Scale.FIT, autoCenter: Phaser.Scale.CENTER_BOTH },
   input: { activePointers: 3 },
 };

@@ -1,7 +1,16 @@
 export type ElementType = "rock" | "paper" | "scissors";
 export type PlayerId = "PLAYER_ONE" | "PLAYER_TWO";
+export type CardKeyword = "HEAVY" | "MARKED" | "LUCKY" | "GUARD" | "SHARP";
 
-export interface Card { id: string; element: ElementType; level: number; }
+export interface Card { id: string; element: ElementType; level: number; keyword?: CardKeyword; }
+
+export const KEYWORD_DESCRIPTION: Record<CardKeyword, string> = {
+  HEAVY: "+2 POWER · CANNOT FOLLOW THE SAME ELEMENT",
+  MARKED: "WINNING THIS HAND ADDS +1 CHIP",
+  LUCKY: "25% CHANCE TO DOUBLE ITS POWER",
+  GUARD: "ON A DRAW, THIS CARD RETURNS TO YOUR HAND",
+  SHARP: "A SCISSORS WIN ADDS +0.10 MATCH MULT",
+};
 
 export const ELEMENT_LABEL: Record<ElementType, string> = { rock: "ROCK", paper: "PAPER", scissors: "SCISSORS" };
 export const ELEMENT_ICON: Record<ElementType, string> = { rock: "✦", paper: "▤", scissors: "✂" };

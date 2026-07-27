@@ -5,7 +5,16 @@ import { getRewardMultiplier } from "../../domain/progression";
 import { progressionService } from "../../services/progressionService";
 import { GameButton } from "../objects/GameButton";
 
-const RELIC_LABELS: Record<string, string> = { "stone-idol": "STONE IDOL", "paper-crown": "PAPER CROWN", "silver-shears": "SILVER SHEARS", "golden-chip": "GOLDEN CHIP" };
+const RELIC_LABELS: Record<string, string> = {
+  "stone-idol": "STONE IDOL",
+  "paper-crown": "PAPER CROWN",
+  "silver-shears": "SILVER SHEARS",
+  "golden-chip": "GOLDEN CHIP",
+  "brass-knuckles": "BRASS KNUCKLES",
+  "carbon-paper": "CARBON PAPER",
+  "red-thread": "RED THREAD",
+  "dealers-eye": "DEALER'S EYE",
+};
 
 export class CollectionScene extends Phaser.Scene {
   constructor() { super("CollectionScene"); }
@@ -21,8 +30,10 @@ export class CollectionScene extends Phaser.Scene {
     this.add.text(72, 160, `ROUND ${run.round}  /  BEST ${profile.bestRound}`, pixelText(12, "#efe2bc")).setOrigin(0, .5);
     this.add.text(72, 205, `◉ ${profile.chips} CHIPS`, pixelText(16, "#d9b867")).setOrigin(0, .5);
     this.add.text(72, 260, `RUN WINS      ${run.wins}\nTOTAL WINS    ${profile.totalWins}\nTOTAL EARNED  ${profile.totalEarned}\nCURRENT MULT  x${getRewardMultiplier(profile).toFixed(2)}\n\nLOSE BEST OF 3:\nTHE RUN RESETS.`, { ...pixelText(8, "#c9bea0"), align: "left", lineSpacing: 12 }).setOrigin(0, 0);
-    this.add.text(72, 455, `DOUBLE CHIPS  ${run.doubleTokens}\nRELICS        ${run.relics.length}/3`, { ...pixelText(8), align: "left", lineSpacing: 12 }).setOrigin(0, 0);
-    new GameButton(this, 250, 605, "How upgrades work", () => this.scene.start("TutorialScene"), 320, "green");
+    const tools = Object.values(run.items).reduce((total, count) => total + count, 0);
+    this.add.text(72, 455, `DOUBLE CHIPS  ${run.doubleTokens}\nRUN TOOLS     ${tools}\nRELICS        ${run.relics.length}/3`, { ...pixelText(8), align: "left", lineSpacing: 12 }).setOrigin(0, 0);
+    new GameButton(this, 250, 550, "Table cosmetics", () => this.scene.start("CosmeticsScene"), 320, "purple");
+    new GameButton(this, 250, 610, "How upgrades work", () => this.scene.start("TutorialScene"), 320, "green");
     new GameButton(this, 250, 670, "Back", () => this.scene.start("MainMenuScene"), 320, "red");
 
     this.add.text(520, 75, "RUN CARDS", pixelText(15, "#efe2bc")).setOrigin(0, .5);

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { consumeDoubleToken, createDefaultProgress, getRewardMultiplier, normalizeProgress, purchaseShopItem, resolveRunRound } from "../src/domain/progression";
+import { consumeDoubleToken, consumeRunItem, createDefaultProgress, generateStructuredShopOffers, getRewardMultiplier, MAX_RUN_ITEMS, normalizeProgress, purchaseShopItem, resolveRunRound } from "../src/domain/progression";
 
 describe("infinite run economy", () => {
   it("advances only after a victory and records the highest round", () => {
@@ -69,9 +69,40 @@ describe("infinite run economy", () => {
 
   it("migrates the previous persistent profile", () => {
     const migrated = normalizeProgress({ chips: 9, victories: 4, upgrades: { rock: 2 }, multiplierLevel: 1 });
-    expect(migrated.version).toBe(2);
+    expect(migrated.version).toBe(5);
     expect(migrated.totalWins).toBe(4);
     expect(migrated.bestRound).toBe(5);
     expect(migrated.run.upgrades.rock).toBe(2);
+  });
+
+  it("organizes market offers into stable lanes", () => {
+    const offers = generateStructuredShopOffers({ ...createDefaultProgress(), chips: 100 }, () => 0);
+    expect(offers.map((offer) => offer?.category)).toEqual(["UPGRADE", "ITEM", "RELIC", "MULT"]);
+  });
+
+  it("buys and consumes tactical run items", () => {
+    const bought = purchaseShopItem({ ...createDefaultProgress(), chips: 20 }, "loaded-coin");
+    expect(bought.success).toBe(true);
+    expect(bought.progress.run.items["loaded-coin"]).toBe(1);
+    expect(consumeRunItem(bought.progress, "loaded-coin")?.run.items["loaded-coin"]).toBe(0);
+  });
+
+  it("applies persistent-for-run relic rewards after a victory", () => {
+    const base = createDefaultProgress();
+    const progress = { ...base, run: { ...base.run, relics: ["brass-knuckles" as const, "dealers-eye" as const] } };
+    const result = resolveRunRound(progress, true, "rock");
+    expect(result.progress.run.upgrades.rock).toBe(1);
+    expect(result.progress.run.freeRerolls).toBe(1);
+  });
+
+  it("caps tactical consumables at three across migration and purchases", () => {
+    const migrated = normalizeProgress({
+      chips: 100,
+      run: { items: { "loaded-coin": 2, "smoke-break": 2, "table-knock": 2 } },
+    });
+    expect(Object.values(migrated.run.items).reduce((total, count) => total + count, 0)).toBe(MAX_RUN_ITEMS);
+    const denied = purchaseShopItem(migrated, "house-match");
+    expect(denied.success).toBe(false);
+    expect(denied.message).toBe("SOLD OUT");
   });
 });

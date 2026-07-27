@@ -11,7 +11,7 @@ const pages = [
   ["CASH OUT", "WIN THE MATCH TO EARN\nCHIPS AND CLIMB A ROUND.", "THE BASE REWARD RISES EVERY FIVE ROUNDS."],
   ["RISK", "IF THE ORACLE WINS\nTHE MATCH, YOUR RUN ENDS.", "YOU RETURN TO ROUND 1 WITH NO RUN POWER."],
   ["UPGRADE", "THE MARKET OPENS ONLY\nBETWEEN WON MATCHES.", "LEVELS, RELICS AND MULT LAST FOR THE RUN."],
-  ["ITEMS", "ACTIVATE A DOUBLE CHIP\nBEFORE CONFIRMING YOUR CARD.", "WIN THE MATCH TO DOUBLE ITS REWARD."],
+  ["ITEMS", "PRESS I BEFORE CONFIRMING\nTO OPEN YOUR RUN TOOLS.", "USE KEYS 1–5 TO ACTIVATE AN ITEM. ESC CLOSES THE TRAY."],
 ];
 
 export class TutorialScene extends Phaser.Scene {
@@ -34,8 +34,9 @@ export class TutorialScene extends Phaser.Scene {
       slots.forEach((slot, index) => slot.setColor(index === this.page ? "#d9b867" : "#756a5d"));
     };
     render();
-    new GameButton(this, 570, 585, "Previous", () => { this.page = Math.max(0, this.page - 1); render(); }, 190);
-    new GameButton(this, 790, 585, "Next", () => { if (this.page === pages.length - 1) this.scene.start("ModeSelectionScene", { mode: "AI" }); else { this.page++; render(); } }, 190);
-    new GameButton(this, 1010, 585, "Exit", () => this.scene.start("MainMenuScene"), 190, "red");
+    new GameButton(this, 520, 585, "Previous", () => { this.page = Math.max(0, this.page - 1); render(); }, 170);
+    new GameButton(this, 710, 585, "Next", () => { if (this.page === pages.length - 1) this.scene.start("ModeSelectionScene", { mode: "AI" }); else { this.page++; render(); } }, 170);
+    new GameButton(this, 900, 585, "Practice", () => this.scene.start("TutorialMatchScene", { reward: false }), 170, "blue");
+    new GameButton(this, 1090, 585, "Exit", () => this.scene.start("MainMenuScene"), 170, "red");
   }
 }

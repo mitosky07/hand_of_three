@@ -1,5 +1,6 @@
 import Phaser from "phaser";
 import { COLORS, drawPixelBackdrop, drawPixelPanel, pixelText } from "../../config/theme";
+import { onboardingService } from "../../services/onboardingService";
 
 export class PreloadScene extends Phaser.Scene {
   constructor() { super("PreloadScene"); }
@@ -34,8 +35,18 @@ export class PreloadScene extends Phaser.Scene {
       shop: ["ShopScene"],
       collection: ["CollectionScene"],
       tutorial: ["TutorialScene"],
-      settings: ["SettingsScene"]
+      practice: ["TutorialMatchScene", { reward: false }],
+      cosmetics: ["CosmeticsScene"],
+      daily: ["MatchScene", { mode: "AI", daily: true }],
+      "daily-shop": ["DailyShopScene"],
+      online: ["OnlineLobbyScene"],
+      settings: ["SettingsScene"],
+      credits: ["CreditsScene"],
     };
+    if (!preview && !new URLSearchParams(window.location.search).has("e2e") && !onboardingService.isComplete()) {
+      this.scene.start("TutorialMatchScene", { reward: true });
+      return;
+    }
     const [scene, data] = preview && destinations[preview] ? destinations[preview] : destinations.menu;
     this.scene.start(scene, data);
   }

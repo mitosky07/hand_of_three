@@ -2,6 +2,8 @@ import Phaser from "phaser";
 import { COLORS, PIXEL_FONT } from "../../config/theme";
 import { ELEMENT_LABEL, type Card } from "../../domain/Card";
 import { audioService } from "../../services/audioService";
+import { progressionService } from "../../services/progressionService";
+import { CARD_BACKS } from "../../domain/cosmetics";
 
 export class CardView extends Phaser.GameObjects.Container {
   readonly card: Card;
@@ -10,6 +12,7 @@ export class CardView extends Phaser.GameObjects.Container {
   private baseY: number;
   private restingScale = 1;
   private selected = false;
+  private levelText?: Phaser.GameObjects.Text;
 
   constructor(scene: Phaser.Scene, x: number, y: number, card: Card, hidden = false) {
     super(scene, x, y);
@@ -65,19 +68,35 @@ export class CardView extends Phaser.GameObjects.Container {
       stroke: "#241713",
       strokeThickness: 4
     }).setOrigin(.5);
-    this.add([art, title, number]);
+    this.levelText = number;
+    const keyword = card.keyword ? scene.add.text(0, -49, card.keyword, {
+      fontFamily: PIXEL_FONT,
+      fontSize: "6px",
+      color: "#ffd166",
+      stroke: "#241713",
+      strokeThickness: 3,
+    }).setOrigin(.5) : null;
+    this.add(keyword ? [art, title, keyword, number] : [art, title, number]);
+  }
+
+  setLevel(level: number) {
+    this.card.level = level;
+    this.levelText?.setText(String(level));
+    return this;
   }
 
   private drawBack(scene: Phaser.Scene) {
+    const selected = progressionService.get().selectedCardBack;
+    const style = CARD_BACKS.find((item) => item.id === selected) ?? CARD_BACKS[0];
     const wood = scene.add.rectangle(0, 0, 132, 184, 0x8b4f2d).setStrokeStyle(5, 0xd89a55);
-    const felt = scene.add.rectangle(0, 0, 112, 164, 0x123d34).setStrokeStyle(3, COLORS.cream);
+    const felt = scene.add.rectangle(0, 0, 112, 164, style.color).setStrokeStyle(3, COLORS.cream);
     const pattern = scene.add.graphics();
     pattern.lineStyle(3, 0x7cc6a5, .7).strokeRect(-47, -70, 94, 140);
     pattern.fillStyle(0x7cc6a5);
     for (let y = -48; y <= 48; y += 24) {
       for (let x = -36; x <= 36; x += 24) pattern.fillRect(x - 3, y - 3, 6, 6);
     }
-    const mark = scene.add.text(0, 0, "III", { fontFamily: PIXEL_FONT, fontSize: "17px", color: "#fff1c7" }).setOrigin(.5);
+    const mark = scene.add.text(0, 0, style.mark, { fontFamily: PIXEL_FONT, fontSize: "17px", color: "#fff1c7" }).setOrigin(.5);
     this.add([wood, felt, pattern, mark]);
   }
 }

@@ -1,38 +1,45 @@
 import Phaser from "phaser";
 
-export const PIXEL_FONT = '"Silkscreen"';
+export const PIXEL_FONT = '"Geist Pixel Square"';
+export const DATA_FONT = '"Geist Pixel Grid"';
 
 export const COLORS = {
-  ink: 0x100e0c,
-  night: 0x1b1814,
-  panel: 0x294137,
-  panelDark: 0x172820,
-  cream: 0xe8dcc0,
-  gold: 0xc7a45b,
-  cyan: 0x718f7b,
-  magenta: 0x985545,
-  coral: 0x985545,
-  violet: 0x554a61,
-  felt: 0x294936,
-  feltLight: 0x365b43,
-  feltDark: 0x14271f,
-  wood: 0x62422f,
-  woodLight: 0x8a6042,
-  woodDark: 0x2b211b,
+  ink: 0x080b0e,
+  night: 0x101820,
+  panel: 0x173440,
+  panelDark: 0x0b2028,
+  cream: 0xf2e8ce,
+  gold: 0xe0ad4f,
+  cyan: 0x58b8c7,
+  magenta: 0xc45263,
+  coral: 0xd1634f,
+  violet: 0x73558d,
+  felt: 0x0f5b5b,
+  feltLight: 0x187573,
+  feltDark: 0x082f36,
+  wood: 0x503229,
+  woodLight: 0x9b6346,
+  woodDark: 0x21191a,
   white: 0xffffff,
 } as const;
 
 export const TEXT_COLORS = {
-  cream: "#e8dcc0",
-  gold: "#c7a45b",
-  mint: "#8ca893",
-  terracotta: "#b06b55",
-  muted: "#bcb299",
-  dim: "#746f64",
+  cream: "#f2e8ce",
+  gold: "#e0ad4f",
+  mint: "#8fd0c9",
+  terracotta: "#d9785f",
+  muted: "#c2cbd0",
+  dim: "#82949b",
 } as const;
 
-export function pixelText(size: number, color = "#e8dcc0"): Phaser.Types.GameObjects.Text.TextStyle {
-  return { fontFamily: PIXEL_FONT, fontSize: `${size}px`, fontStyle: size >= 14 ? "bold" : "normal", color, lineSpacing: 6, align: "center" };
+export function pixelText(size: number, color = "#f2e8ce"): Phaser.Types.GameObjects.Text.TextStyle {
+  return {
+    fontFamily: size <= 8 ? DATA_FONT : PIXEL_FONT,
+    fontSize: `${size}px`,
+    color,
+    lineSpacing: 6,
+    align: "center",
+  };
 }
 
 export function drawPixelBackdrop(scene: Phaser.Scene, accent: number = COLORS.cyan): void {

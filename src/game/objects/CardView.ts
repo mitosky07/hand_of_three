@@ -52,18 +52,18 @@ export class CardView extends Phaser.GameObjects.Container {
     const upgrade = Number.isFinite(baseLevel) ? Math.max(0, card.level - baseLevel) : 0;
     const title = scene.add.text(0, -69, `${ELEMENT_LABEL[card.element]}${upgrade ? ` +${upgrade}` : ""}`, {
       fontFamily: PIXEL_FONT,
-      fontSize: "10px",
+      fontSize: "12px",
       color: "#e8dcc0",
     }).setOrigin(.5);
     const number = scene.add.text(0, 68, String(card.level), {
       fontFamily: PIXEL_FONT,
-      fontSize: "18px",
+      fontSize: "20px",
       color: "#e8dcc0",
     }).setOrigin(.5);
     this.levelText = number;
     const keyword = card.keyword ? scene.add.text(0, 43, card.keyword, {
       fontFamily: PIXEL_FONT,
-      fontSize: "6px",
+      fontSize: "10px",
       color: "#c7a45b",
     }).setOrigin(.5) : null;
     this.add(keyword
@@ -80,15 +80,11 @@ export class CardView extends Phaser.GameObjects.Container {
   private drawBack(scene: Phaser.Scene) {
     const selected = progressionService.get().selectedCardBack;
     const style = CARD_BACKS.find((item) => item.id === selected) ?? CARD_BACKS[0];
-    const wood = scene.add.rectangle(0, 0, 132, 184, COLORS.wood).setStrokeStyle(3, COLORS.woodDark);
-    const felt = scene.add.rectangle(0, 0, 118, 170, style.color).setStrokeStyle(2, COLORS.cream, .75);
-    const pattern = scene.add.graphics();
-    pattern.lineStyle(2, COLORS.gold, .58).strokeRect(-48, -72, 96, 144);
-    pattern.fillStyle(COLORS.cream, .38);
-    for (let y = -48; y <= 48; y += 32) {
-      for (let x = -32; x <= 32; x += 32) pattern.fillRect(x - 2, y - 2, 4, 4);
-    }
-    const mark = scene.add.text(0, 0, style.mark, { fontFamily: PIXEL_FONT, fontSize: "15px", color: "#e8dcc0" }).setOrigin(.5);
-    this.add([wood, felt, pattern, mark]);
+    const color = scene.add.rectangle(-2, -3, 112, 162, style.color);
+    const back = scene.add.image(0, 0, "video-card-back");
+    const mark = scene.add.text(0, 0, style.mark, { fontFamily: PIXEL_FONT, fontSize: "13px", color: "#f2e8ce" })
+      .setOrigin(.5)
+      .setStroke("#080b0e", 3);
+    this.add([color, back, mark]);
   }
 }

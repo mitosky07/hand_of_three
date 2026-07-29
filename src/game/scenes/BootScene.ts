@@ -12,6 +12,9 @@ export class BootScene extends Phaser.Scene {
       this.scene.start("PreloadScene");
     };
     window.setTimeout(proceed, 500);
-    document.fonts?.load('16px "Silkscreen"').then(proceed, proceed);
+    Promise.all([
+      document.fonts?.load('16px "Geist Pixel Square"'),
+      document.fonts?.load('10px "Geist Pixel Grid"'),
+    ]).then(proceed, proceed);
   }
 }

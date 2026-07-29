@@ -58,8 +58,8 @@ export class ResultsScene extends Phaser.Scene {
     this.add.rectangle(310, 315, 440, 160, 0x102d24).setStrokeStyle(3, 0xb99b62);
     this.add.text(125, 265, "HOUSE PAYOUT", pixelText(8, "#8e816d")).setOrigin(0, .5);
     this.add.text(125, 320, won ? `◉ +${reward.earned}` : "RUN CHIPS LOST", won ? pixelText(31, "#d9b867") : pixelText(10, "#a9674e")).setOrigin(0, .5);
-    this.add.text(125, 365, won ? `${reward.base} BASE × ${reward.multiplier.toFixed(2)} MULT${reward.bonusChips ? ` + ${reward.bonusChips} MARKED` : ""}${reward.doubled ? " × 2 ITEM" : ""}` : "A FRESH RUN STARTS FROM ZERO", pixelText(7, "#c9bea0")).setOrigin(0, .5);
-    if (reward.contractId) this.add.text(125, 410, reward.contractCompleted ? `CONTRACT CLEARED · ${reward.contractReward}` : "CONTRACT MISSED · NO PENALTY", pixelText(7, reward.contractCompleted ? "#7fa98a" : "#a9674e")).setOrigin(0, .5);
+    this.add.text(125, 365, won ? `${reward.base} BASE × ${reward.multiplier.toFixed(2)} MULT${reward.bonusChips ? ` + ${reward.bonusChips} MARKED` : ""}${reward.doubled ? " × 2 ITEM" : ""}` : "A FRESH RUN STARTS FROM ZERO", pixelText(9, "#c9bea0")).setOrigin(0, .5);
+    if (reward.contractId) this.add.text(125, 410, reward.contractCompleted ? `CONTRACT CLEARED · ${reward.contractReward}` : "CONTRACT MISSED · NO PENALTY", pixelText(9, reward.contractCompleted ? "#7fa98a" : "#a9674e")).setOrigin(0, .5);
     this.add.text(92, 465, `WALLET  ◉ ${profile.chips}\nBEST    ROUND ${profile.bestRound}\nTOTAL WINS  ${profile.totalWins}`, { ...pixelText(9, "#c9bea0"), align: "left", lineSpacing: 13 }).setOrigin(0, 0);
     this.add.text(835, 85, won ? "BETWEEN MATCHES" : "NEW RUN", pixelText(12, "#d9b867")).setOrigin(0, .5);
     new GameButton(this, 990, 190, won ? `Play round ${profile.run.round}` : "Start from round 1", () => this.scene.start("MatchScene", { mode: "AI" }), 300, "blue");

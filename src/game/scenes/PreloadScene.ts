@@ -6,6 +6,7 @@ export class PreloadScene extends Phaser.Scene {
   constructor() { super("PreloadScene"); }
   preload() {
     this.load.spritesheet("video-poker-buttons", new URL("../../assets/ui/video-poker-buttons.png", import.meta.url).href, { frameWidth: 96, frameHeight: 48 });
+    this.load.spritesheet("video-poker-icons", new URL("../../assets/ui/video-poker-icons.png", import.meta.url).href, { frameWidth: 48, frameHeight: 48 });
     this.load.image("video-poker-panel", new URL("../../assets/ui/video-poker-panel.png", import.meta.url).href);
     this.load.image("video-poker-cabinet", new URL("../../assets/ui/video-poker-cabinet.png", import.meta.url).href);
     this.load.image("video-poker-table-classic", new URL("../../assets/ui/table-classic.png", import.meta.url).href);
@@ -15,6 +16,7 @@ export class PreloadScene extends Phaser.Scene {
     this.load.image("video-card-rock", new URL("../../assets/ui/card-rock.png", import.meta.url).href);
     this.load.image("video-card-paper", new URL("../../assets/ui/card-paper.png", import.meta.url).href);
     this.load.image("video-card-scissors", new URL("../../assets/ui/card-scissors.png", import.meta.url).href);
+    this.load.image("video-card-back", new URL("../../assets/ui/card-back.png", import.meta.url).href);
   }
   create() {
     drawPixelBackdrop(this, COLORS.magenta);

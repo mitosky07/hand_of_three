@@ -36,7 +36,7 @@ See [docs/MULTIPLAYER.md](docs/MULTIPLAYER.md) for deployment, environment varia
 
 AI mode uses two independent Web Crypto RNG steps: one to generate the Oracle's deck and another to choose a card from its hand. Local mode hides Player 1's choice before the device is passed to Player 2. Production-ready pixel assets live under `src/assets`; Phaser and Web Audio provide animation, particles, backgrounds and sound.
 
-## Version 1.2 features
+## Version 1.4 features
 
 - Real online best-of-three rooms with private codes and an authoritative WebSocket server.
 - Card keywords: Heavy, Marked, Lucky, Guard and Sharp.
@@ -48,9 +48,9 @@ AI mode uses two independent Web Crypto RNG steps: one to generate the Oracle's 
 - Interactive first-run tutorial, reduced motion and skippable results.
 - Structured market lanes: Tune-up, Backroom, Relic Case and Night Special.
 
-The interface uses the bundled Silkscreen typeface under the SIL Open Font License. Phones request landscape orientation to preserve table readability. Every menu supports WASD or arrow-key navigation plus `Enter`/`Space`. During matches, `A/D` or left/right selects cards, `W` or up confirms, `S` or down cancels, `1-5` directly selects a card, `I` opens run items and `Escape` pauses or closes an overlay. Online tables use `Enter` to copy a waiting room code or request a rematch and `Escape` to leave.
+The interface uses the bundled Geist Pixel Square and Geist Pixel Grid typefaces under the SIL Open Font License. All cabinet, table, button, card, and item sprites have editable sources in `art-source/aseprite`; regenerate their runtime PNG exports with `npm run assets:build`. Phones request landscape orientation to preserve table readability. Every menu supports WASD or arrow-key navigation plus `Enter`/`Space`. During matches, `A/D` or left/right selects cards, `W` or up confirms, `S` or down cancels, `1-5` directly selects a card, `I` opens run items and `Escape` pauses or closes an overlay. Online tables use `Enter` to copy a waiting room code or request a rematch and `Escape` to leave.
 
-All screens share the same underground poker-room art direction: pixel wood, green felt, cream piping, brass rivets and raised buttons. Each winning element has its own finisher: Scissors slices, Rock crushes and Paper wraps the defeated card.
+All screens share the same underground poker-room art direction: a hand-built oval table, walnut rails, woven felt, imperfect print marks and raised cabinet buttons. The Rock, Paper and Scissors cards use original, editable Aseprite artwork rather than generated image assets. Each winning element has its own finisher: Scissors slices, Rock crushes and Paper wraps the defeated card.
 
 ## Progression and market
 
@@ -60,7 +60,7 @@ The lobby always shows the next step, current round and best round. Inventory su
 
 ## Art production
 
-Editable studies are stored in `art-source/aseprite`. The current cabinet, controls, table variants and card frames are generated deterministically by `tools/generate-video-poker-assets.ps1`; their production PNG files live in `src/assets/ui`. The generator keeps every surface on the same palette and hard pixel grid.
+Editable production sprites are stored in `art-source/aseprite`. Run `npm run assets:build` to rebuild the cabinet, controls, tables, cards, and item icons through Aseprite; their runtime PNG exports live in `src/assets/ui`. The pipeline keeps every surface on the same palette and two-pixel grid.
 
 See [docs/ART_DIRECTION.md](docs/ART_DIRECTION.md) for the visual rules used across the game.
 

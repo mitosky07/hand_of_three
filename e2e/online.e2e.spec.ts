@@ -24,7 +24,7 @@ async function waitForScene(page: Page, key: string) {
 async function openOnlineLobby(page: Page) {
   await page.goto("/?e2e=1");
   await waitForScene(page, "MainMenuScene");
-  await page.locator("canvas").click({ position: { x: 930, y: 242 } });
+  await page.locator("canvas").click({ position: { x: 755, y: 353 } });
   await waitForScene(page, "OnlineLobbyScene");
 }
 

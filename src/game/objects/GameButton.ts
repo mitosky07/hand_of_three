@@ -108,8 +108,8 @@ export class GameButton extends Phaser.GameObjects.Container {
       .setInteractive({ useHandCursor: true });
     this.label = scene.add.text(0, -1, label.toUpperCase(), {
       fontFamily: PIXEL_FONT,
-      fontSize: "12px",
-      color: "#e8dcc0",
+      fontSize: "14px",
+      color: "#f2e8ce",
       align: "center",
       wordWrap: { width: width - 28 },
       lineSpacing: 3,
@@ -134,7 +134,7 @@ export class GameButton extends Phaser.GameObjects.Container {
 
   setEnabled(enabled: boolean) {
     this.enabled = enabled;
-    this.setAlpha(enabled ? 1 : .35);
+    this.setAlpha(enabled ? 1 : .48);
     enabled ? this.background.setInteractive({ useHandCursor: true }) : this.background.disableInteractive();
     refreshFocus(this.scene);
     return this;

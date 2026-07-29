@@ -5,13 +5,6 @@ import { progressionService } from "../../services/progressionService";
 import { GameButton, type ButtonTone } from "../objects/GameButton";
 
 const TONE_COLOR: Record<ButtonTone, number> = { green: 0x294137, blue: 0x334b52, orange: 0x694735, red: 0x633b35, purple: 0x494052 };
-const LANE_MARK: Record<(typeof SHOP_LANES)[number], string> = {
-  TUNE_UP: "+",
-  BACKROOM: "?",
-  RELIC_CASE: "III",
-  NIGHT_SPECIAL: "*",
-};
-
 export class ShopScene extends Phaser.Scene {
   private offers: Array<ShopItem | undefined> = [];
   private offerViews: Phaser.GameObjects.Container[] = [];
@@ -29,14 +22,14 @@ export class ShopScene extends Phaser.Scene {
     this.add.text(72, 70, "MARKET", pixelText(24, "#d9b867")).setOrigin(0, .5);
     this.add.text(72, 106, "UNDER THE TABLE", pixelText(8, "#a9674e")).setOrigin(0, .5);
     this.chipsText = this.add.text(72, 158, "", pixelText(17, "#efe2bc")).setOrigin(0, .5);
-    this.statsText = this.add.text(72, 210, "", { ...pixelText(8, "#c9bea0"), align: "left", lineSpacing: 11 }).setOrigin(0, 0);
+    this.statsText = this.add.text(72, 210, "", { ...pixelText(10, "#c2cbd0"), align: "left", lineSpacing: 11 }).setOrigin(0, 0);
     this.add.text(72, 337, "HOUSE RULE", pixelText(8, "#a9674e")).setOrigin(0, .5);
-    this.add.text(72, 370, "UPGRADES LAST\nFOR THIS RUN.\n\nWIN › BUY › CLIMB", { ...pixelText(7, "#efe2bc"), align: "left", lineSpacing: 12 }).setOrigin(0, 0);
+    this.add.text(72, 370, "UPGRADES LAST\nFOR THIS RUN.\n\nWIN › BUY › CLIMB", { ...pixelText(9, "#f2e8ce"), align: "left", lineSpacing: 12 }).setOrigin(0, 0);
     this.rerollButton = new GameButton(this, 170, 510, "", () => this.reroll(), 205, "blue");
     new GameButton(this, 170, 580, "Play round", () => this.scene.start("MatchScene", { mode: "AI" }), 205, "green");
     new GameButton(this, 170, 650, "Lobby", () => this.scene.start("MainMenuScene"), 205, "red");
     this.add.text(360, 65, "TONIGHT'S WARES", pixelText(17, "#efe2bc")).setOrigin(0, .5);
-    this.add.text(360, 96, "TUNE-UP · BACKROOM · RELIC CASE · NIGHT SPECIAL", pixelText(7, "#8e816d")).setOrigin(0, .5);
+    this.add.text(360, 96, "TUNE-UP · BACKROOM · RELIC CASE · NIGHT SPECIAL", pixelText(9, "#8e816d")).setOrigin(0, .5);
     this.messageText = this.add.text(1160, 70, "", pixelText(9, "#d9b867")).setOrigin(1, .5);
     this.offers = generateStructuredShopOffers(progressionService.get());
     this.render();
@@ -63,19 +56,18 @@ export class ShopScene extends Phaser.Scene {
     container.add([shadow, body, inner]);
     if (!item) {
       container.add([
-        this.add.text(-145, -83, lane.replaceAll("_", " "), pixelText(7, "#d9b867")).setOrigin(0, .5),
+        this.add.text(-145, -83, lane.replaceAll("_", " "), pixelText(9, "#d9b867")).setOrigin(0, .5),
         this.add.text(0, 0, "SOLD OUT", pixelText(9, "#756a5d")).setOrigin(.5),
       ]);
       this.offerViews.push(container);
       return;
     }
-    const iconPlate = this.add.rectangle(112, -54, 48, 48, COLORS.ink, .64).setStrokeStyle(2, COLORS.gold, .72);
-    const icon = this.add.text(112, -54, LANE_MARK[lane], pixelText(lane === "RELIC_CASE" ? 7 : 17, "#e8dcc0")).setOrigin(.5);
-    container.add([iconPlate, icon]);
+    const icon = this.add.image(112, -54, "video-poker-icons", item.iconFrame);
+    container.add(icon);
     container.add([
-      this.add.text(-145, -83, lane.replaceAll("_", " "), pixelText(7, "#d9b867")).setOrigin(0, .5),
+      this.add.text(-145, -83, lane.replaceAll("_", " "), pixelText(9, "#d9b867")).setOrigin(0, .5),
       this.add.text(-145, -48, item.name.toUpperCase(), { ...pixelText(11, "#efe2bc"), align: "left", wordWrap: { width: 235 } }).setOrigin(0, .5),
-      this.add.text(-145, -8, item.description.toUpperCase(), { ...pixelText(8, "#c9bea0"), align: "left", wordWrap: { width: 285 }, lineSpacing: 7 }).setOrigin(0, 0),
+      this.add.text(-145, -8, item.description.toUpperCase(), { ...pixelText(9, "#c2cbd0"), align: "left", wordWrap: { width: 285 }, lineSpacing: 7 }).setOrigin(0, 0),
       this.add.text(-140, 76, `◉ ${item.price}`, pixelText(13, "#d9b867")).setOrigin(0, .5),
     ]);
     const buy = new GameButton(this, x + 85, y + 76, "Buy", () => this.buy(item), 150, item.color);

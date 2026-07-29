@@ -1,21 +1,20 @@
 @font-face {
-  font-family: "Silkscreen";
-  src: url("./assets/Silkscreen-Regular.ttf") format("truetype");
+  font-family: "Geist Pixel Square";
+  src: url("./assets/fonts/GeistPixel-Square.woff2") format("woff2");
   font-display: swap;
 }
 
 @font-face {
-  font-family: "Silkscreen";
-  src: url("./assets/Silkscreen-Bold.ttf") format("truetype");
-  font-weight: 700;
+  font-family: "Geist Pixel Grid";
+  src: url("./assets/fonts/GeistPixel-Grid.woff2") format("woff2");
   font-display: swap;
 }
 
-:root { font-family: "Silkscreen", monospace; color: #e8dcc0; background: #100e0c; image-rendering: pixelated; }
+:root { font-family: "Geist Pixel Square", monospace; color: #f2e8ce; background: #070b0f; image-rendering: pixelated; }
 * { box-sizing: border-box; }
-body { margin: 0; min-width: 320px; min-height: 100vh; display: grid; place-items: center; background: #100e0c; overflow: hidden; }
+body { margin: 0; min-width: 320px; min-height: 100vh; display: grid; place-items: center; background: #070b0f; overflow: hidden; }
 #app, #app canvas { display: block; }
-canvas { max-width: 100%; max-height: 100vh; image-rendering: pixelated; box-shadow: 0 0 0 2px #72503a, 0 16px 48px #000b; }
+canvas { max-width: 100%; max-height: 100vh; image-rendering: pixelated; box-shadow: 0 0 0 2px #526872, 0 0 0 6px #11181d, 0 18px 52px #000e; }
 
 #rotate-device { display: none; position: fixed; inset: 0; z-index: 20; place-content: center; justify-items: center; gap: 18px; padding: 30px; text-align: center; background: #1d3028; color: #e8dcc0; }
 #rotate-device span { font-size: 54px; color: #c7a45b; }

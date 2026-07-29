@@ -76,7 +76,7 @@ test("interactive practice tutorial completes all three lessons", async ({ page 
 test("reduced-motion setting persists after reload", async ({ page }) => {
   await page.goto("/?scene=settings&e2e=1");
   await waitForScene(page, "SettingsScene");
-  await page.locator("canvas").click({ position: { x: 930, y: 340 } });
+  await page.locator("canvas").click({ position: { x: 800, y: 365 } });
   await expect.poll(() => page.evaluate(() => JSON.parse(localStorage.getItem("hand-of-three-settings") ?? "{}").reducedMotion)).toBe(true);
   await page.reload();
   await waitForScene(page, "SettingsScene");

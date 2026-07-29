@@ -6,13 +6,13 @@ export class CreditsScene extends Phaser.Scene {
   constructor() { super("CreditsScene"); }
   create() {
     drawPixelBackdrop(this, COLORS.magenta);
-    drawPixelPanel(this, 384, 350, 610, 500, COLORS.magenta);
-    drawPixelPanel(this, 930, 350, 390, 500, COLORS.gold);
-    this.add.text(120, 130, "CREDITS // TABLE CREW", pixelText(11, TEXT_COLORS.mint)).setOrigin(0, .5);
-    this.add.text(120, 188, "HAND\nOF THREE", { ...pixelText(33, TEXT_COLORS.gold), align: "left" }).setOrigin(0, 0);
-    this.add.text(120, 330, "CREATED BY\nMITOSKY07\n\nGAME DESIGN & CODE\nMITOSKY07\n\nVISUAL DIRECTION\nAFTER-HOURS VIDEO POKER", { ...pixelText(9), align: "left" }).setOrigin(0, 0);
-    this.add.text(780, 158, "PRODUCTION NOTES", pixelText(13, TEXT_COLORS.gold)).setOrigin(0, .5);
-    this.add.text(780, 235, "TYPEFACE\nSILKSCREEN · OFL\n\nPIXEL ART\nCUSTOM SPRITES · 1X WORK GRID\n\nAUDIO\nWEB AUDIO SYNTHESIS\n\nBUILD\n1.2.1", { ...pixelText(8, TEXT_COLORS.muted), align: "left" }).setOrigin(0, 0);
-    new GameButton(this, 930, 530, "Back to lobby", () => this.scene.start("MainMenuScene"), 300);
+    drawPixelPanel(this, 640, 360, 920, 520, COLORS.magenta);
+    this.add.text(220, 145, "HAND OF THREE", pixelText(33, TEXT_COLORS.gold)).setOrigin(0, .5);
+    this.add.text(220, 188, "CREDITS // TABLE CREW", pixelText(11, TEXT_COLORS.mint)).setOrigin(0, .5);
+    this.add.rectangle(440, 365, 430, 280, COLORS.ink, .66).setStrokeStyle(2, COLORS.magenta, .65);
+    this.add.text(260, 260, "CREATED BY\nMITOSKY07\n\nGAME DESIGN & CODE\nMITOSKY07\n\nART & INTERFACE\nORIGINAL ASEPRITE PIXEL WORK", { ...pixelText(11), align: "left", lineSpacing: 9 }).setOrigin(0, 0);
+    this.add.text(720, 235, "PRODUCTION NOTES", pixelText(15, TEXT_COLORS.gold)).setOrigin(0, .5);
+    this.add.text(720, 280, "TYPEFACE\nGEIST PIXEL · OFL\n\nPIXEL ART\nEDITABLE ASEPRITE SOURCES · 2PX GRID\n\nAUDIO\nWEB AUDIO SYNTHESIS\n\nBUILD 1.4.1", { ...pixelText(10, TEXT_COLORS.muted), align: "left", lineSpacing: 8 }).setOrigin(0, 0);
+    new GameButton(this, 820, 535, "Back to lobby", () => this.scene.start("MainMenuScene"), 350, "red");
   }
 }

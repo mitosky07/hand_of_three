@@ -107,10 +107,10 @@ export class OnlineMatchScene extends Phaser.Scene {
     const back = CARD_BACKS.find((item) => item.id === progressionService.get().selectedCardBack) ?? CARD_BACKS[0];
     for (let index = 0; index < count; index++) {
       const x = 640 + (index - (count - 1) / 2) * 34;
-      const shadow = this.add.rectangle(x + 3, 149, 52, 68, COLORS.ink);
-      const card = this.add.rectangle(x, 145, 52, 68, back.color).setStrokeStyle(2, COLORS.woodLight);
-      const mark = this.add.text(x, 145, back.mark, pixelText(6, "#9fd3a9")).setOrigin(.5);
-      this.dynamic.add([shadow, card, mark]);
+      const color = this.add.rectangle(x - 1, 144, 44, 62, back.color);
+      const card = this.add.image(x, 145, "video-card-back").setScale(.39);
+      const mark = this.add.text(x, 145, back.mark, pixelText(8, "#f2e8ce")).setOrigin(.5).setStroke("#080b0e", 2);
+      this.dynamic.add([color, card, mark]);
     }
   }
 

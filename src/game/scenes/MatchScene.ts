@@ -64,20 +64,23 @@ export class MatchScene extends Phaser.Scene {
     );
     drawPixelBackdrop(this, COLORS.gold);
     this.drawTable();
-    this.score = this.add.text(54, 42, "", { fontFamily: PIXEL_FONT, fontSize: "13px", color: "#efe2bc", lineSpacing: 8 });
-    this.opponent = this.add.text(1226, 42, "", { fontFamily: PIXEL_FONT, fontSize: "13px", color: "#efe2bc", align: "right", lineSpacing: 8 }).setOrigin(1, 0);
-    this.roundText = this.add.text(640, 43, "", pixelText(15, "#d9b867")).setOrigin(.5);
-    this.streakText = this.add.text(640, 72, "", pixelText(8, "#c9bea0")).setOrigin(.5);
-    this.chipsText = this.add.text(300, 98, "", pixelText(9, "#d9b867")).setOrigin(0, .5);
-    this.multiplierText = this.add.text(980, 98, "", pixelText(9, "#7fa98a")).setOrigin(1, .5);
-    this.center = this.add.container(640, 260);
-    this.opponentHand = this.add.container(640, 145);
-    this.handCounter = this.add.text(640, 101, "", pixelText(8, "#d9b867")).setOrigin(.5);
-    this.statusPlate = this.add.rectangle(640, 395, 670, 68, COLORS.ink, .84).setStrokeStyle(2, COLORS.gold, .5);
-    this.status = this.add.text(640, 395, "", { ...pixelText(10), wordWrap: { width: 640 }, lineSpacing: 6 }).setOrigin(.5);
-    this.confirm = new GameButton(this, 640, 465, "2 · Confirm", () => this.confirmSelection(), 230, "blue");
-    new GameButton(this, 215, 465, "Pause", () => this.openPause(), 170, "red");
-    this.doubleButton = new GameButton(this, 1065, 465, "I · Run items", () => this.openItemMenu(), 205, "purple");
+    this.add.rectangle(640, 72, 1160, 86, COLORS.ink, .9).setStrokeStyle(2, COLORS.cyan, .42);
+    this.add.rectangle(640, 654, 1110, 62, COLORS.woodDark, .96).setStrokeStyle(3, COLORS.woodLight);
+    this.add.rectangle(640, 632, 1040, 3, COLORS.gold, .6);
+    this.score = this.add.text(54, 38, "", { fontFamily: PIXEL_FONT, fontSize: "15px", color: "#f2e8ce", lineSpacing: 8 });
+    this.opponent = this.add.text(1226, 38, "", { fontFamily: PIXEL_FONT, fontSize: "15px", color: "#f2e8ce", align: "right", lineSpacing: 8 }).setOrigin(1, 0);
+    this.roundText = this.add.text(640, 42, "", pixelText(17, "#e0ad4f")).setOrigin(.5);
+    this.streakText = this.add.text(640, 72, "", pixelText(10, "#c2cbd0")).setOrigin(.5);
+    this.chipsText = this.add.text(300, 100, "", pixelText(10, "#e0ad4f")).setOrigin(0, .5);
+    this.multiplierText = this.add.text(980, 100, "", pixelText(10, "#8fd0c9")).setOrigin(1, .5);
+    this.center = this.add.container(640, 275);
+    this.opponentHand = this.add.container(640, 154);
+    this.handCounter = this.add.text(640, 101, "", pixelText(10, "#e0ad4f")).setOrigin(.5);
+    this.statusPlate = this.add.rectangle(640, 412, 720, 56, COLORS.ink, .92).setStrokeStyle(2, COLORS.cyan, .55);
+    this.status = this.add.text(640, 412, "", { ...pixelText(12), wordWrap: { width: 680 }, lineSpacing: 6 }).setOrigin(.5);
+    this.confirm = new GameButton(this, 640, 654, "Deal · Confirm", () => this.confirmSelection(), 250, "blue");
+    new GameButton(this, 220, 654, "Pause", () => this.openPause(), 180, "red");
+    this.doubleButton = new GameButton(this, 1060, 654, "I · Run items", () => this.openItemMenu(), 220, "purple");
     this.doubleButton.setVisible(this.mode === "AI" && !this.daily);
     const keyboard = this.input.keyboard;
     keyboard?.on("keydown", this.handleKeyDown, this);
@@ -109,7 +112,7 @@ export class MatchScene extends Phaser.Scene {
     this.updateStreak();
     if (phase === MatchPhase.WAITING_FOR_SELECTION || phase === MatchPhase.CARD_SELECTED) {
       this.renderHand("PLAYER_ONE");
-      this.status.setText(this.selected ? "STEP 2 · CONFIRM YOUR PLAY" : "STEP 1 · CHOOSE A CARD FROM YOUR HAND");
+      this.status.setText(this.selected ? "CARD SET · DEAL WHEN READY" : "CHOOSE ONE CARD");
       this.confirm.setVisible(true).setEnabled(Boolean(this.selected));
       const itemCount = this.runItemCount();
       this.doubleButton.setLabel(this.doubleActive ? `x2 active · ${itemCount}` : `I · Items ${itemCount}`);
@@ -123,12 +126,12 @@ export class MatchScene extends Phaser.Scene {
     this.activeHandPlayer = player;
     this.keyboardCardIndex = -1;
     const hand = this.controller.state.players[player].hand;
-    const spacing = Math.min(122, 620 / Math.max(1, hand.length));
+    const spacing = Math.min(134, 690 / Math.max(1, hand.length));
     const start = 640 - ((hand.length - 1) * spacing) / 2;
     hand.forEach((card, index) => {
       const distance = index - (hand.length - 1) / 2;
-      const view = new CardView(this, start + index * spacing, 580 + Math.abs(distance) * 3, card);
-      view.setRestingScale(.62).setAngle(distance * 1.8);
+      const view = new CardView(this, start + index * spacing, 530 + Math.abs(distance) * 3, card);
+      view.setRestingScale(.74).setAngle(distance * 1.25);
       view.setAlpha(0).setY(view.y + 26);
       this.tweens.add({ targets: view, y: view.y - 26, alpha: 1, duration: 260, delay: index * 55, ease: "Back.out" });
       (view.list[1] as Phaser.GameObjects.Rectangle).on("pointerup", () => player === "PLAYER_ONE" ? this.selectPlayerOne(view) : this.selectPlayerTwo(view));
@@ -141,12 +144,12 @@ export class MatchScene extends Phaser.Scene {
     const back = CARD_BACKS.find((item) => item.id === progressionService.get().selectedCardBack) ?? CARD_BACKS[0];
     for (let index = 0; index < count; index++) {
       const x = (index - (count - 1) / 2) * 34;
-      const shadow = this.add.rectangle(x + 3, 4, 52, 68, COLORS.ink);
-      const card = this.add.rectangle(x, 0, 52, 68, back.color).setStrokeStyle(2, COLORS.woodLight);
-      const mark = this.add.text(x, 1, back.mark, pixelText(6, "#9fd3a9")).setOrigin(.5);
-      shadow.setAlpha(0); card.setAlpha(0); mark.setAlpha(0);
-      this.tweens.add({ targets: [shadow, card, mark], alpha: 1, duration: 170, delay: index * 45 });
-      this.opponentHand.add([shadow, card, mark]);
+      const color = this.add.rectangle(x - 1, -1, 47, 68, back.color);
+      const card = this.add.image(x, 0, "video-card-back").setScale(.42);
+      const mark = this.add.text(x, 0, back.mark, pixelText(7, "#f2e8ce")).setOrigin(.5).setStroke("#080b0e", 2);
+      color.setAlpha(0); card.setAlpha(0); mark.setAlpha(0);
+      this.tweens.add({ targets: [color, card, mark], alpha: 1, duration: 170, delay: index * 45 });
+      this.opponentHand.add([color, card, mark]);
     }
   }
 
@@ -329,7 +332,7 @@ export class MatchScene extends Phaser.Scene {
       this.add.rectangle(640, 360, 1280, 720, COLORS.ink, .9),
       this.add.rectangle(640, 350, 760, 570, COLORS.panelDark).setStrokeStyle(5, COLORS.violet),
       this.add.text(640, 105, "RUN ITEMS", pixelText(20, "#d9b867")).setOrigin(.5),
-      this.add.text(640, 140, "USE BEFORE LOCKING · PRESS 1-5 · ESC TO CLOSE", pixelText(7, "#c9bea0")).setOrigin(.5),
+      this.add.text(640, 140, "USE BEFORE LOCKING · PRESS 1-5 · ESC TO CLOSE", pixelText(9, "#c9bea0")).setOrigin(.5),
     ]);
     const entries: Array<[string, number, () => void]> = [
       [`DOUBLE CHIP ×${run.doubleTokens}`, run.doubleTokens, () => this.activateDoubleToken()],
@@ -574,7 +577,7 @@ export class MatchScene extends Phaser.Scene {
       this.selected = null;
       this.keyboardCardIndex = -1;
       this.confirm.setEnabled(false);
-      this.status.setText("STEP 1 · CHOOSE A CARD FROM YOUR HAND");
+      this.status.setText("CHOOSE ONE CARD");
       return;
     }
     if (this.activeHandPlayer === "PLAYER_TWO" && this.keyboardCardIndex >= 0) {

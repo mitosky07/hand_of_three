@@ -27,8 +27,8 @@ export class TutorialScene extends Phaser.Scene {
     pages.forEach((_, index) => slots.push(this.add.text(135, 325 + index * 27, `0${index + 1}`, pixelText(8, "#756a5d")).setOrigin(0, .5)));
     const number = this.add.text(520, 160, "", pixelText(52, "#a9674e")).setOrigin(0, .5);
     const title = this.add.text(680, 160, "", pixelText(25, "#d9b867")).setOrigin(0, .5);
-    const body = this.add.text(520, 280, "", { ...pixelText(13), align: "left" }).setOrigin(0, 0);
-    const tip = this.add.text(520, 420, "", { ...pixelText(8, "#7fa98a"), align: "left", wordWrap: { width: 650 } }).setOrigin(0, 0);
+    const body = this.add.text(520, 270, "", { ...pixelText(16), align: "left", lineSpacing: 10 }).setOrigin(0, 0);
+    const tip = this.add.text(520, 430, "", { ...pixelText(10, "#8fd0c9"), align: "left", wordWrap: { width: 650 } }).setOrigin(0, 0);
     const render = () => {
       number.setText(`0${this.page + 1}`); title.setText(pages[this.page][0]); body.setText(pages[this.page][1]); tip.setText(`TIP // ${pages[this.page][2]}`);
       slots.forEach((slot, index) => slot.setColor(index === this.page ? "#d9b867" : "#756a5d"));

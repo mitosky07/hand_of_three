@@ -1,7 +1,7 @@
 {
   "name": "hand-of-three",
   "private": true,
-  "version": "1.2.1",
+  "version": "1.4.1",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -17,6 +17,7 @@
     "e2e:server": "vite --host 127.0.0.1 --port 4173",
     "test:watch": "vitest",
     "preview": "vite preview",
+    "assets:build": "powershell -NoProfile -ExecutionPolicy Bypass -File tools/export-aseprite-assets.ps1",
     "package:itch": "npm run build && python tools/make_zip.py"
   },
   "dependencies": {

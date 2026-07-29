@@ -47,36 +47,28 @@ export class CardView extends Phaser.GameObjects.Container {
   }
 
   private drawFace(scene: Phaser.Scene, card: Card) {
-    const textureKey = `card-art-${card.element}`;
-    const texture = scene.textures.get(textureKey);
-    const frameName = "card-crop";
-    if (!texture.has(frameName)) texture.add(frameName, 0, 100, 115, 824, 1280);
-    const art = scene.add.image(0, 0, textureKey, frameName).setDisplaySize(132, 184);
+    const face = scene.add.image(0, 0, `video-card-${card.element}`);
     const baseLevel = Number(card.id.split("-").at(-1));
     const upgrade = Number.isFinite(baseLevel) ? Math.max(0, card.level - baseLevel) : 0;
-    const title = scene.add.text(0, -70, `${ELEMENT_LABEL[card.element]}${upgrade ? ` +${upgrade}` : ""}`, {
+    const title = scene.add.text(0, -69, `${ELEMENT_LABEL[card.element]}${upgrade ? ` +${upgrade}` : ""}`, {
       fontFamily: PIXEL_FONT,
-      fontSize: "9px",
-      color: "#fff1c7",
-      stroke: "#2b1b17",
-      strokeThickness: 3
+      fontSize: "10px",
+      color: "#e8dcc0",
     }).setOrigin(.5);
-    const number = scene.add.text(0, 61, String(card.level), {
+    const number = scene.add.text(0, 68, String(card.level), {
       fontFamily: PIXEL_FONT,
-      fontSize: "19px",
-      color: "#fff1c7",
-      stroke: "#241713",
-      strokeThickness: 4
+      fontSize: "18px",
+      color: "#e8dcc0",
     }).setOrigin(.5);
     this.levelText = number;
-    const keyword = card.keyword ? scene.add.text(0, -49, card.keyword, {
+    const keyword = card.keyword ? scene.add.text(0, 43, card.keyword, {
       fontFamily: PIXEL_FONT,
       fontSize: "6px",
-      color: "#ffd166",
-      stroke: "#241713",
-      strokeThickness: 3,
+      color: "#c7a45b",
     }).setOrigin(.5) : null;
-    this.add(keyword ? [art, title, keyword, number] : [art, title, number]);
+    this.add(keyword
+      ? [face, title, keyword, number]
+      : [face, title, number]);
   }
 
   setLevel(level: number) {
@@ -88,15 +80,15 @@ export class CardView extends Phaser.GameObjects.Container {
   private drawBack(scene: Phaser.Scene) {
     const selected = progressionService.get().selectedCardBack;
     const style = CARD_BACKS.find((item) => item.id === selected) ?? CARD_BACKS[0];
-    const wood = scene.add.rectangle(0, 0, 132, 184, 0x8b4f2d).setStrokeStyle(5, 0xd89a55);
-    const felt = scene.add.rectangle(0, 0, 112, 164, style.color).setStrokeStyle(3, COLORS.cream);
+    const wood = scene.add.rectangle(0, 0, 132, 184, COLORS.wood).setStrokeStyle(3, COLORS.woodDark);
+    const felt = scene.add.rectangle(0, 0, 118, 170, style.color).setStrokeStyle(2, COLORS.cream, .75);
     const pattern = scene.add.graphics();
-    pattern.lineStyle(3, 0x7cc6a5, .7).strokeRect(-47, -70, 94, 140);
-    pattern.fillStyle(0x7cc6a5);
-    for (let y = -48; y <= 48; y += 24) {
-      for (let x = -36; x <= 36; x += 24) pattern.fillRect(x - 3, y - 3, 6, 6);
+    pattern.lineStyle(2, COLORS.gold, .58).strokeRect(-48, -72, 96, 144);
+    pattern.fillStyle(COLORS.cream, .38);
+    for (let y = -48; y <= 48; y += 32) {
+      for (let x = -32; x <= 32; x += 32) pattern.fillRect(x - 2, y - 2, 4, 4);
     }
-    const mark = scene.add.text(0, 0, style.mark, { fontFamily: PIXEL_FONT, fontSize: "17px", color: "#fff1c7" }).setOrigin(.5);
+    const mark = scene.add.text(0, 0, style.mark, { fontFamily: PIXEL_FONT, fontSize: "15px", color: "#e8dcc0" }).setOrigin(.5);
     this.add([wood, felt, pattern, mark]);
   }
 }

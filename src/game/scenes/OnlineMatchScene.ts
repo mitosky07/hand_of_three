@@ -34,10 +34,14 @@ export class OnlineMatchScene extends Phaser.Scene {
   }
 
   private drawTable() {
-    const texture = this.textures.get("poker-table-art");
-    if (!texture.has("online-table-crop")) texture.add("online-table-crop", 0, 50, 200, 1154, 835);
     const felt = feltById(progressionService.get().selectedFelt);
-    this.add.image(640, 392, "poker-table-art", "online-table-crop").setDisplaySize(1080, 560).setTint(felt.tint).setDepth(-5);
+    const tableTextures = {
+      CLASSIC_FELT: "video-poker-table-classic",
+      MIDNIGHT_FELT: "video-poker-table-midnight",
+      CRIMSON_FELT: "video-poker-table-crimson",
+      VIOLET_FELT: "video-poker-table-violet",
+    } as const;
+    this.add.image(640, 367, tableTextures[felt.id]).setDepth(-5);
   }
 
   private render(view: OnlineMatchView) {

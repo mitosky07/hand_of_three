@@ -21,7 +21,7 @@ export class TutorialScene extends Phaser.Scene {
     drawPixelBackdrop(this, COLORS.magenta);
     drawPixelPanel(this, 246, 360, 300, 520, COLORS.magenta);
     drawPixelPanel(this, 790, 330, 720, 460, COLORS.cyan);
-    this.add.text(118, 130, "HOUSE RULES // 1985", pixelText(10, "#d9b867")).setOrigin(0, .5);
+    this.add.text(118, 130, "HOUSE RULES // TABLE 03", pixelText(10, "#d9b867")).setOrigin(0, .5);
     this.add.text(118, 180, "QUICK\nRUN\nGUIDE", { ...pixelText(23, "#efe2bc"), align: "left" }).setOrigin(0, 0);
     const slots: Phaser.GameObjects.Text[] = [];
     pages.forEach((_, index) => slots.push(this.add.text(135, 325 + index * 27, `0${index + 1}`, pixelText(8, "#756a5d")).setOrigin(0, .5)));

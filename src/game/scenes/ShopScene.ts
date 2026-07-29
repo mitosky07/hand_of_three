@@ -4,7 +4,13 @@ import { generateStructuredShopOffers, getRewardMultiplier, SHOP_LANES, type Sho
 import { progressionService } from "../../services/progressionService";
 import { GameButton, type ButtonTone } from "../objects/GameButton";
 
-const TONE_COLOR: Record<ButtonTone, number> = { green: 0x244c38, blue: 0x315f6b, orange: 0x805038, red: 0x713d38, purple: 0x55425f };
+const TONE_COLOR: Record<ButtonTone, number> = { green: 0x294137, blue: 0x334b52, orange: 0x694735, red: 0x633b35, purple: 0x494052 };
+const LANE_MARK: Record<(typeof SHOP_LANES)[number], string> = {
+  TUNE_UP: "+",
+  BACKROOM: "?",
+  RELIC_CASE: "III",
+  NIGHT_SPECIAL: "*",
+};
 
 export class ShopScene extends Phaser.Scene {
   private offers: Array<ShopItem | undefined> = [];
@@ -52,8 +58,8 @@ export class ShopScene extends Phaser.Scene {
     const container = this.add.container(x, y);
     const lane = SHOP_LANES[index];
     const shadow = this.add.rectangle(9, 11, 350, 220, COLORS.ink, .78);
-    const body = this.add.rectangle(0, 0, 350, 220, item ? TONE_COLOR[item.color] : 0x102d24).setStrokeStyle(5, 0x6e3b27);
-    const inner = this.add.rectangle(0, 0, 332, 202).setStrokeStyle(2, 0xb99b62, .75);
+    const body = this.add.rectangle(0, 0, 350, 220, item ? TONE_COLOR[item.color] : COLORS.panelDark).setStrokeStyle(3, COLORS.woodLight);
+    const inner = this.add.rectangle(0, 0, 334, 204).setStrokeStyle(1, COLORS.cream, .42);
     container.add([shadow, body, inner]);
     if (!item) {
       container.add([
@@ -63,10 +69,9 @@ export class ShopScene extends Phaser.Scene {
       this.offerViews.push(container);
       return;
     }
-    if (this.textures.exists("item-icons")) {
-      const icon = this.add.image(112, -54, "item-icons", item.iconFrame).setDisplaySize(58, 58);
-      container.add(icon);
-    }
+    const iconPlate = this.add.rectangle(112, -54, 48, 48, COLORS.ink, .64).setStrokeStyle(2, COLORS.gold, .72);
+    const icon = this.add.text(112, -54, LANE_MARK[lane], pixelText(lane === "RELIC_CASE" ? 7 : 17, "#e8dcc0")).setOrigin(.5);
+    container.add([iconPlate, icon]);
     container.add([
       this.add.text(-145, -83, lane.replaceAll("_", " "), pixelText(7, "#d9b867")).setOrigin(0, .5),
       this.add.text(-145, -48, item.name.toUpperCase(), { ...pixelText(11, "#efe2bc"), align: "left", wordWrap: { width: 235 } }).setOrigin(0, .5),

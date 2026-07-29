@@ -5,12 +5,12 @@ import { getMenuCommand } from "../input/keyboardControls";
 
 export type ButtonTone = "green" | "blue" | "orange" | "red" | "purple";
 
-const TONES: Record<ButtonTone, { base: number; hover: number; stroke: number }> = {
-  green: { base: 0x244c38, hover: 0x35634a, stroke: 0x7fa98a },
-  blue: { base: 0x315f6b, hover: 0x417986, stroke: 0x83aab0 },
-  orange: { base: 0x805038, hover: 0x9a6548, stroke: 0xc39665 },
-  red: { base: 0x713d38, hover: 0x8a4b43, stroke: 0xb8796d },
-  purple: { base: 0x55425f, hover: 0x6c5478, stroke: 0x9f87a7 },
+const TONES: Record<ButtonTone, { normal: number; hover: number; pressed: number }> = {
+  green: { normal: 0, hover: 1, pressed: 2 },
+  blue: { normal: 3, hover: 4, pressed: 5 },
+  orange: { normal: 6, hover: 7, pressed: 8 },
+  red: { normal: 9, hover: 10, pressed: 11 },
+  purple: { normal: 12, hover: 13, pressed: 14 },
 };
 
 interface MenuKeyboardState {
@@ -88,10 +88,10 @@ function registerButton(scene: Phaser.Scene, button: GameButton) {
 }
 
 export class GameButton extends Phaser.GameObjects.Container {
-  private readonly background: Phaser.GameObjects.Rectangle;
-  private readonly shadow: Phaser.GameObjects.Rectangle;
+  private readonly background: Phaser.GameObjects.NineSlice;
+  private readonly shadow: Phaser.GameObjects.NineSlice;
   private readonly label: Phaser.GameObjects.Text;
-  private readonly tone: { base: number; hover: number; stroke: number };
+  private readonly tone: { normal: number; hover: number; pressed: number };
   private readonly onClick: () => void;
   private enabled = true;
   private keyboardFocused = false;
@@ -101,17 +101,34 @@ export class GameButton extends Phaser.GameObjects.Container {
     scene.add.existing(this);
     this.tone = TONES[tone];
     this.onClick = onClick;
-    const deepShadow = scene.add.rectangle(8, 9, width, 52, COLORS.ink, .8);
-    this.shadow = scene.add.rectangle(4, 5, width, 52, COLORS.woodDark);
-    this.background = scene.add.rectangle(0, 0, width, 52, this.tone.base).setStrokeStyle(3, this.tone.stroke).setInteractive({ useHandCursor: true });
-    const inset = scene.add.rectangle(0, 0, width - 12, 40).setStrokeStyle(2, COLORS.cream, .55);
-    const marker = scene.add.rectangle(-width / 2 + 12, 0, 7, 30, COLORS.gold);
-    this.label = scene.add.text(-width / 2 + 30, 0, label.toUpperCase(), { fontFamily: PIXEL_FONT, fontSize: "12px", color: "#fff4cf", align: "left", wordWrap: { width: width - 52 }, lineSpacing: 4 }).setOrigin(0, .5);
-    this.add([deepShadow, this.shadow, this.background, inset, marker, this.label]);
+    this.shadow = scene.add.nineslice(5, 6, "video-poker-buttons", this.tone.normal, width, 48, 12, 12, 12, 12)
+      .setTint(COLORS.ink)
+      .setAlpha(.72);
+    this.background = scene.add.nineslice(0, 0, "video-poker-buttons", this.tone.normal, width, 48, 12, 12, 12, 12)
+      .setInteractive({ useHandCursor: true });
+    this.label = scene.add.text(0, -1, label.toUpperCase(), {
+      fontFamily: PIXEL_FONT,
+      fontSize: "12px",
+      color: "#e8dcc0",
+      align: "center",
+      wordWrap: { width: width - 28 },
+      lineSpacing: 3,
+    }).setOrigin(.5);
+    this.add([this.shadow, this.background, this.label]);
     this.background.on("pointerover", () => { audioService.play("hover"); focusButton(scene, this); this.setKeyboardFocus(true); });
-    this.background.on("pointerout", () => { if (!this.keyboardFocused) this.setKeyboardFocus(false); });
-    this.background.on("pointerdown", () => this.setPosition(this.x + 3, this.y + 3));
-    this.background.on("pointerup", () => { this.setPosition(this.x - 3, this.y - 3); this.activate(); });
+    this.background.on("pointerout", () => {
+      this.label.setY(-1);
+      if (!this.keyboardFocused) this.setKeyboardFocus(false);
+    });
+    this.background.on("pointerdown", () => {
+      this.background.setFrame(this.tone.pressed);
+      this.label.setY(2);
+    });
+    this.background.on("pointerup", () => {
+      this.background.setFrame(this.tone.hover);
+      this.label.setY(-1);
+      this.activate();
+    });
     registerButton(scene, this);
   }
 
@@ -134,9 +151,8 @@ export class GameButton extends Phaser.GameObjects.Container {
 
   setKeyboardFocus(focused: boolean) {
     this.keyboardFocused = focused;
-    this.background.setFillStyle(focused ? this.tone.hover : this.tone.base);
-    this.background.setStrokeStyle(3, focused ? COLORS.cream : this.tone.stroke);
-    this.setScale(focused ? 1.025 : 1);
+    this.background.setFrame(focused ? this.tone.hover : this.tone.normal);
+    this.setScale(focused ? 1.01 : 1);
     return this;
   }
 

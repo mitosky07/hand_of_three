@@ -18,18 +18,16 @@ export class MainMenuScene extends Phaser.Scene {
     drawPixelPanel(this, 930, 360, 480, 650, COLORS.cyan);
 
     const sign = this.add.graphics();
-    sign.fillStyle(0x120d0b).fillRect(112, 82, 470, 188);
-    sign.lineStyle(6, 0x6e3b27).strokeRect(112, 82, 470, 188);
-    sign.lineStyle(2, COLORS.gold, .8).strokeRect(126, 96, 442, 160);
-    for (let x = 145; x < 560; x += 28) {
-      sign.fillStyle((x / 28) % 2 ? 0x789b78 : 0xcaa85f).fillRect(x, 105, 6, 6);
-      sign.fillRect(x, 241, 6, 6);
-    }
-    this.add.text(347, 142, "HAND", pixelText(43, "#d9b867")).setOrigin(.5);
-    this.add.text(347, 201, "OF THREE", pixelText(34, "#efe2bc")).setOrigin(.5);
-    this.add.text(347, 306, "KARJITSU // AFTER HOURS", pixelText(8, "#a9674e")).setOrigin(.5);
+    sign.fillStyle(COLORS.ink).fillRect(122, 92, 450, 166);
+    sign.lineStyle(3, COLORS.woodLight).strokeRect(122, 92, 450, 166);
+    sign.fillStyle(COLORS.magenta).fillRect(138, 108, 72, 4);
+    sign.fillStyle(COLORS.gold).fillRect(484, 238, 72, 4);
+    this.add.text(148, 120, "HOUSE GAME No. 03", pixelText(8, "#8ca893")).setOrigin(0, .5);
+    this.add.text(347, 164, "HAND OF THREE", pixelText(30, "#e8dcc0")).setOrigin(.5);
+    this.add.text(347, 210, "ROCK  /  PAPER  /  SCISSORS", pixelText(8, "#c7a45b")).setOrigin(.5);
+    this.add.text(347, 300, "AN AFTER-HOURS CARD GAME", pixelText(8, "#b06b55")).setOrigin(.5);
 
-    this.add.rectangle(347, 440, 450, 190, 0x102d24, .98).setStrokeStyle(3, 0xb99b62);
+    this.add.rectangle(347, 440, 450, 190, COLORS.panelDark, .98).setStrokeStyle(2, COLORS.gold, .66);
     this.add.text(145, 370, "ENDLESS RUN", pixelText(10, "#7fa98a")).setOrigin(0, .5);
     this.add.text(145, 416, `ROUND ${String(profile.run.round).padStart(2, "0")}`, pixelText(21, "#efe2bc")).setOrigin(0, .5);
     this.add.text(430, 416, `BEST ${String(profile.bestRound).padStart(2, "0")}`, pixelText(10, "#d9b867")).setOrigin(.5);

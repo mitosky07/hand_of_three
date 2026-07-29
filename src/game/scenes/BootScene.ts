@@ -5,6 +5,13 @@ export class BootScene extends Phaser.Scene {
   create() {
     timeTracker.start("PLAY", "Hand of Three game session");
     window.addEventListener("beforeunload", () => timeTracker.stop(), { once: true });
-    document.fonts.load('16px "Press Start 2P"').finally(() => this.scene.start("PreloadScene"));
+    let started = false;
+    const proceed = () => {
+      if (started) return;
+      started = true;
+      this.scene.start("PreloadScene");
+    };
+    window.setTimeout(proceed, 500);
+    document.fonts?.load('16px "Silkscreen"').then(proceed, proceed);
   }
 }

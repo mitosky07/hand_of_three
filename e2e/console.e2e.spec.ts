@@ -5,6 +5,7 @@ declare global {
     __HAND_OF_THREE_GAME__?: {
       scene: {
         isActive: (key: string) => boolean;
+        stop: (key: string) => void;
         start: (key: string, data?: object) => void;
       };
     };
@@ -44,7 +45,11 @@ test("every directly reachable screen loads without console, page or asset error
   await expect.poll(() => page.evaluate(() => Boolean(window.__HAND_OF_THREE_GAME__?.scene.isActive("MainMenuScene")))).toBe(true);
   for (const screen of screens) {
     currentScreen = screen.name;
-    await page.evaluate(({ scene, data }) => window.__HAND_OF_THREE_GAME__?.scene.start(scene, data), screen);
+    await page.evaluate(({ scene, data }) => {
+      const manager = window.__HAND_OF_THREE_GAME__?.scene;
+      if (manager?.isActive(scene)) manager.stop(scene);
+      manager?.start(scene, data);
+    }, screen);
     await expect.poll(
       () => page.evaluate((key) => Boolean(window.__HAND_OF_THREE_GAME__?.scene.isActive(key)), screen.scene),
       { message: `${screen.name} did not open ${screen.scene}` },

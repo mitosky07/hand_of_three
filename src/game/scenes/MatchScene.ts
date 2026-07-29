@@ -86,10 +86,14 @@ export class MatchScene extends Phaser.Scene {
   }
 
   private drawTable() {
-    const texture = this.textures.get("poker-table-art");
-    if (!texture.has("table-crop")) texture.add("table-crop", 0, 50, 200, 1154, 835);
     const felt = feltById(progressionService.get().selectedFelt);
-    this.add.image(640, 392, "poker-table-art", "table-crop").setDisplaySize(1080, 560).setTint(felt.tint).setDepth(-5);
+    const tableTextures = {
+      CLASSIC_FELT: "video-poker-table-classic",
+      MIDNIGHT_FELT: "video-poker-table-midnight",
+      CRIMSON_FELT: "video-poker-table-crimson",
+      VIOLET_FELT: "video-poker-table-violet",
+    } as const;
+    this.add.image(640, 367, tableTextures[felt.id]).setDepth(-5);
   }
 
   private render() {

@@ -1,76 +1,75 @@
 import Phaser from "phaser";
 
-export const PIXEL_FONT = '"Press Start 2P"';
+export const PIXEL_FONT = '"Silkscreen"';
 
 export const COLORS = {
-  ink: 0x0d0a09,
-  night: 0x17110f,
-  panel: 0x234438,
-  panelDark: 0x102d24,
-  cream: 0xefe2bc,
-  gold: 0xd9b867,
-  cyan: 0x7fa98a,
-  magenta: 0xa9674e,
-  coral: 0xa9674e,
-  violet: 0x55425f,
-  felt: 0x244c38,
-  feltLight: 0x35634a,
-  feltDark: 0x0b241c,
-  wood: 0x653a28,
-  woodLight: 0x9a5c3e,
-  woodDark: 0x321d17,
+  ink: 0x100e0c,
+  night: 0x1b1814,
+  panel: 0x294137,
+  panelDark: 0x172820,
+  cream: 0xe8dcc0,
+  gold: 0xc7a45b,
+  cyan: 0x718f7b,
+  magenta: 0x985545,
+  coral: 0x985545,
+  violet: 0x554a61,
+  felt: 0x294936,
+  feltLight: 0x365b43,
+  feltDark: 0x14271f,
+  wood: 0x62422f,
+  woodLight: 0x8a6042,
+  woodDark: 0x2b211b,
   white: 0xffffff,
 } as const;
 
 export const TEXT_COLORS = {
-  cream: "#efe2bc",
-  gold: "#d9b867",
-  mint: "#7fa98a",
-  terracotta: "#a9674e",
-  muted: "#c9bea0",
-  dim: "#756a5d",
+  cream: "#e8dcc0",
+  gold: "#c7a45b",
+  mint: "#8ca893",
+  terracotta: "#b06b55",
+  muted: "#bcb299",
+  dim: "#746f64",
 } as const;
 
-export function pixelText(size: number, color = "#fff1c7"): Phaser.Types.GameObjects.Text.TextStyle {
-  return { fontFamily: PIXEL_FONT, fontSize: `${size}px`, color, lineSpacing: 8, align: "center" };
+export function pixelText(size: number, color = "#e8dcc0"): Phaser.Types.GameObjects.Text.TextStyle {
+  return { fontFamily: PIXEL_FONT, fontSize: `${size}px`, fontStyle: size >= 14 ? "bold" : "normal", color, lineSpacing: 6, align: "center" };
 }
 
 export function drawPixelBackdrop(scene: Phaser.Scene, accent: number = COLORS.cyan): void {
   scene.cameras.main.setBackgroundColor(COLORS.ink);
+  if (scene.textures.exists("video-poker-cabinet")) {
+    scene.add.image(640, 360, "video-poker-cabinet").setDepth(-20);
+    scene.add.rectangle(1168, 58, 42, 4, accent, .78).setDepth(-19);
+    return;
+  }
   const graphics = scene.add.graphics().setDepth(-20);
   graphics.fillStyle(COLORS.night).fillRect(0, 0, 1280, 720);
 
-  const planks = [0x271713, 0x2d1a15, 0x211310, 0x321c16, 0x291713];
-  for (let y = 0, row = 0; y < 720; y += 72, row++) {
-    graphics.fillStyle(planks[row % planks.length]).fillRect(0, y, 1280, 70);
-    graphics.fillStyle(COLORS.woodLight, .16).fillRect(0, y + 4, 1280, 4);
-    graphics.fillStyle(COLORS.ink, .55).fillRect(0, y + 68, 1280, 4);
-    for (let x = row % 2 ? 180 : 0; x < 1280; x += 360) graphics.fillStyle(COLORS.ink, .3).fillRect(x, y, 4, 70);
+  const planks = [0x251a15, 0x2a1d17, 0x211713, 0x2d1f18];
+  for (let y = 0, row = 0; y < 720; y += 90, row++) {
+    graphics.fillStyle(planks[row % planks.length]).fillRect(0, y, 1280, 88);
+    graphics.fillStyle(COLORS.woodLight, .12).fillRect(0, y + 3, 1280, 2);
+    graphics.fillStyle(COLORS.ink, .72).fillRect(0, y + 87, 1280, 3);
+    for (let x = row % 2 ? 240 : 0; x < 1280; x += 480) graphics.fillStyle(COLORS.ink, .22).fillRect(x, y, 3, 88);
   }
 
-  graphics.fillStyle(COLORS.feltDark, .92).fillRect(32, 28, 1216, 664);
-  graphics.lineStyle(5, COLORS.woodLight, .8).strokeRect(32, 28, 1216, 664);
-  graphics.lineStyle(2, COLORS.cream, .35).strokeRect(44, 40, 1192, 640);
-  graphics.lineStyle(2, accent, .13);
-  for (let x = 72; x < 1240; x += 48) {
-    for (let y = 70; y < 680; y += 48) {
-      graphics.beginPath(); graphics.moveTo(x, y - 5); graphics.lineTo(x + 5, y); graphics.lineTo(x, y + 5); graphics.lineTo(x - 5, y); graphics.closePath(); graphics.strokePath();
-    }
-  }
-
-  graphics.fillStyle(COLORS.gold);
-  [[48, 44], [1232, 44], [48, 676], [1232, 676]].forEach(([x, y]) => graphics.fillRect(x - 4, y - 4, 8, 8));
+  graphics.fillStyle(COLORS.feltDark, .97).fillRect(38, 32, 1204, 656);
+  graphics.lineStyle(4, COLORS.woodLight, .78).strokeRect(38, 32, 1204, 656);
+  graphics.lineStyle(1, COLORS.cream, .22).strokeRect(47, 41, 1186, 638);
+  graphics.fillStyle(accent, .48).fillRect(64, 50, 160, 3);
 }
 
 export function drawPixelPanel(scene: Phaser.Scene, x: number, y: number, width: number, height: number, accent: number = COLORS.cyan): Phaser.GameObjects.Container {
-  const deepShadow = scene.add.rectangle(12, 14, width, height, COLORS.ink, .8);
-  const woodOuter = scene.add.rectangle(0, 0, width, height, COLORS.wood).setStrokeStyle(5, COLORS.woodDark);
-  const woodHighlight = scene.add.rectangle(0, -3, width - 12, height - 12).setStrokeStyle(4, COLORS.woodLight, .9);
-  const feltBody = scene.add.rectangle(0, 0, width - 28, height - 28, COLORS.panelDark, .98).setStrokeStyle(3, COLORS.cream, .9);
-  const inner = scene.add.rectangle(0, 0, width - 42, height - 42).setStrokeStyle(2, accent, .42);
-  const plaqueShadow = scene.add.rectangle(-width * .18 + 4, -height / 2 + 19, width * .42, 13, COLORS.ink, .7);
-  const plaque = scene.add.rectangle(-width * .18, -height / 2 + 15, width * .42, 11, accent);
-  const cornerA = scene.add.rectangle(-width / 2 + 15, -height / 2 + 15, 10, 10, COLORS.gold);
-  const cornerB = scene.add.rectangle(width / 2 - 15, height / 2 - 15, 10, 10, COLORS.gold);
-  return scene.add.container(x, y, [deepShadow, woodOuter, woodHighlight, feltBody, inner, plaqueShadow, plaque, cornerA, cornerB]);
+  if (scene.textures.exists("video-poker-panel")) {
+    const shadow = scene.add.nineslice(7, 9, "video-poker-panel", undefined, width, height, 12, 12, 12, 12).setTint(COLORS.ink).setAlpha(.72);
+    const panel = scene.add.nineslice(0, 0, "video-poker-panel", undefined, width, height, 12, 12, 12, 12);
+    const led = scene.add.rectangle(-width / 2 + 18, -height / 2 + 16, 10, 4, accent, .9);
+    return scene.add.container(x, y, [shadow, panel, led]);
+  }
+  const shadow = scene.add.rectangle(8, 10, width, height, COLORS.ink, .74);
+  const frame = scene.add.rectangle(0, 0, width, height, COLORS.woodDark).setStrokeStyle(3, COLORS.woodLight);
+  const body = scene.add.rectangle(0, 0, width - 14, height - 14, COLORS.panelDark, .99);
+  const topRule = scene.add.rectangle(-width * .24, -height / 2 + 11, width * .34, 4, accent, .86);
+  const stitch = scene.add.rectangle(width / 2 - 13, height / 2 - 13, 6, 6, COLORS.gold, .78);
+  return scene.add.container(x, y, [shadow, frame, body, topRule, stitch]);
 }

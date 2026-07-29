@@ -1,17 +1,24 @@
 @font-face {
-  font-family: "Press Start 2P";
-  src: url("/fonts/PressStart2P-Regular.ttf") format("truetype");
+  font-family: "Silkscreen";
+  src: url("./assets/Silkscreen-Regular.ttf") format("truetype");
   font-display: swap;
 }
 
-:root { font-family: "Press Start 2P", monospace; color: #fff4cf; background: #1a100c; image-rendering: pixelated; }
-* { box-sizing: border-box; }
-body { margin: 0; min-width: 320px; min-height: 100vh; display: grid; place-items: center; background: #1a100c; overflow: hidden; }
-#app, #app canvas { display: block; }
-canvas { max-width: 100%; max-height: 100vh; image-rendering: pixelated; box-shadow: 0 0 0 4px #8f5030, 0 0 0 8px #4a291d, 0 18px 60px #000a; }
+@font-face {
+  font-family: "Silkscreen";
+  src: url("./assets/Silkscreen-Bold.ttf") format("truetype");
+  font-weight: 700;
+  font-display: swap;
+}
 
-#rotate-device { display: none; position: fixed; inset: 0; z-index: 20; place-content: center; justify-items: center; gap: 18px; padding: 30px; text-align: center; background: #173728; color: #fff4cf; }
-#rotate-device span { font-size: 54px; color: #e8c477; }
+:root { font-family: "Silkscreen", monospace; color: #e8dcc0; background: #100e0c; image-rendering: pixelated; }
+* { box-sizing: border-box; }
+body { margin: 0; min-width: 320px; min-height: 100vh; display: grid; place-items: center; background: #100e0c; overflow: hidden; }
+#app, #app canvas { display: block; }
+canvas { max-width: 100%; max-height: 100vh; image-rendering: pixelated; box-shadow: 0 0 0 2px #72503a, 0 16px 48px #000b; }
+
+#rotate-device { display: none; position: fixed; inset: 0; z-index: 20; place-content: center; justify-items: center; gap: 18px; padding: 30px; text-align: center; background: #1d3028; color: #e8dcc0; }
+#rotate-device span { font-size: 54px; color: #c7a45b; }
 #rotate-device strong { font-size: 14px; line-height: 1.7; }
 #rotate-device small { max-width: 300px; color: #c7b99b; font-size: 8px; line-height: 1.8; }
 

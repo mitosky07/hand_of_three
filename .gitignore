@@ -2,3 +2,8 @@ node_modules
 dist
 Hand-of-Three-*.zip
 test-results
+release
+public
+src/assets/PressStart2P-Regular.ttf
+art-source/simple-card-icons-triptych.png
+art-source/video-poker-direction.png
